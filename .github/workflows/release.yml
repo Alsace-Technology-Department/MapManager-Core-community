@@ -31,6 +31,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/MapManager-Core-${{ env.PROJECT_VERSION }}-jar-with-dependencies.jar
+          asset_path: ./target/MapManager-Core-${{ env.PROJECT_VERSION }}.jar
           asset_name: MapManager-Core-${{ env.PROJECT_VERSION }}.jar
           asset_content_type: application/java-archive
