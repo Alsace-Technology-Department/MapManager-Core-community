@@ -1,0 +1,86 @@
+package work.alsace.mapmanager.command
+
+import org.bukkit.command.*
+import org.bukkit.entity.Player
+import work.alsace.mapmanager.MapManager
+import java.util.*
+import java.util.stream.Collectors
+
+class CreateCommand(private val plugin: MapManager?) : TabExecutor {
+    private val emptyList: MutableList<String?> = ArrayList(0)
+    override fun onTabComplete(
+        sender: CommandSender,
+        cmd: Command,
+        label: String,
+        args: Array<out String>
+    ): MutableList<String?>? {
+        if (!sender.hasPermission("mapmanager.command.create")) return emptyList
+        val index = args.size.minus(1)
+        return if (index.let { args[it].length } < 2) emptyList else when (args[index].substring(0, 2)) {
+            "n:" -> {
+                val prefix = args[index].lowercase(Locale.getDefault())
+                plugin?.getDynamicWorld()?.getPotentialWorlds()?.stream()
+                    ?.map { s: String? -> "n:$s" }
+                    ?.filter { s: String? -> s?.lowercase(Locale.getDefault())!!.startsWith(prefix) }
+                    ?.collect(Collectors.toList())
+            }
+
+            "e:" -> {
+                val worldTypes = listOf("void_gen", "normal", "nether", "the_end", "flat")
+                val prefix = args[index].lowercase(Locale.getDefault())
+                worldTypes.stream()
+                    .map { type -> "e:$type" }
+                    .filter { type -> type.lowercase(Locale.getDefault()).startsWith(prefix) }
+                    .collect(Collectors.toList())
+            }
+
+            "o:" -> {
+                val prefix = args[index].lowercase(Locale.getDefault())
+                plugin?.server?.onlinePlayers?.stream()
+                    ?.map { p: Player? -> "o:" + p?.name }
+                    ?.filter { s: String? -> s?.lowercase(Locale.getDefault())!!.startsWith(prefix) }
+                    ?.collect(Collectors.toList())
+            }
+
+            else -> {
+                emptyList
+            }
+        }
+    }
+    override fun onCommand(sender: CommandSender, cmd: Command, p2: String, args: Array<out String>): Boolean {
+        if (!sender.hasPermission("mapmanager.command.create")) {
+            sender.sendMessage("§c你没有权限使用此命令")
+            return true
+        }
+        var name: String? = null
+        var generate: String? = null
+        var alias: String? = null
+        var color = "darkaqua"
+        var group: String? = null
+        var owner: String? = null
+        for (arg in args) {
+            when (arg.substring(0, 2)) {
+                "n:" -> name = arg.substring(2)
+                "e" -> generate = arg.substring(2)
+                "a:" -> alias = arg.substring(2)
+                "c:" -> color = arg.substring(2)
+                "g:" -> group = arg.substring(2)
+                "o:" -> owner = arg.substring(2)
+                else -> {}
+            }
+        }
+        if (name == null) {
+            sender.sendMessage("§c未指定地图名")
+            return true
+        }
+        if (alias == null) alias = name
+        if (group == null) group = name
+        if (!generate?.let { plugin?.getDynamicWorld()?.createWorld(name, alias, color, it) }!!) {
+            sender.sendMessage("§c地图创建失败，请查看控制台以获取更多信息")
+            return true
+        }
+        plugin?.getMapAgent()?.newWorld(name, owner, group)
+        sender.sendMessage("§a已创建并初始化地图")
+        return true
+    }
+}

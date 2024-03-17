@@ -25,15 +25,28 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      - name: List build artifacts
-        run: ls -lah ./target/
+      - name: List build artifacts for Core
+        run: ls -lah ./MapManager-Core/target/
 
-      - name: Upload Artifact to GitHub Release
+      - name: Upload Core Artifact to GitHub Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/MapManager-Core-${{ env.PROJECT_VERSION }}.jar
+          asset_path: ./MapManager-Core/target/MapManager-Core-${{ env.PROJECT_VERSION }}.jar
           asset_name: MapManager-Core-${{ env.PROJECT_VERSION }}.jar
+          asset_content_type: application/java-archive
+
+      - name: List build artifacts for API
+        run: ls -lah ./MapManager-API/target/
+
+      - name: Upload API Artifact to GitHub Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./MapManager-API/target/MapManager-API-${{ env.PROJECT_VERSION }}.jar
+          asset_name: MapManager-API-${{ env.PROJECT_VERSION }}.jar
           asset_content_type: application/java-archive

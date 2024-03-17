@@ -1,0 +1,35 @@
+name: MapManager-Core
+main: work.alsace.mapmanager.MapManager
+version: 2.9
+#description: '地图管理核心插件-社区版-1.16-1.19'
+depend: [LuckPerms, Multiverse-Core]
+softdepend:
+  - VoidGen
+api-version: 1.16
+authors:
+  - AlsaceWork
+  - CHuNan
+  - Hanamizu
+commands:
+  import:
+    usage: /import
+    description: import a world map
+  world:
+    usage: /world
+    description: modify world settings
+  write:
+    usage: /write
+    description: none
+  delete:
+    usage: /delete [world]
+    description: delete a world map.
+  mapadmin:
+    usage: /mapadmin.md <operation>
+    description: none.
+  worldtp:
+    aliases: [wtp]
+    usage: /worldtp <world name>
+    description: Teleport you to a specific world.
+  create:
+    usage: /create
+    description: Create a new flat world without buildings.

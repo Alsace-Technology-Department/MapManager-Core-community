@@ -3,7 +3,7 @@
   <component name="AutoImportedSourceRoots">
     <option name="directories">
       <list>
-        <option value="src/MapManager-Core/kotlin" />
+        <option value="src/main/kotlin" />
         <option value="target/generated-sources/annotations" />
       </list>
     </option>
