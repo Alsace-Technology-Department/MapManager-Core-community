@@ -28,7 +28,10 @@ import java.util.concurrent.ExecutionException
 import java.util.function.Consumer
 import java.util.stream.Collectors
 
-class MapAgent(private val plugin: MapManager?) {
+/**
+ * 地图管理代理，负责处理与LuckPerms权限插件的交互、管理世界及其权限组等功能。
+ */
+open class MapAgent(private val plugin: MapManager?) {
     private val nodeIO: FileIO<WorldNode?>?
     private val groupIO: FileIO<WorldGroup?>?
     private val yaml: MainYaml?
@@ -95,7 +98,7 @@ class MapAgent(private val plugin: MapManager?) {
         return groupMap?.getOrDefault(group, nullWorldGroup)
     }
 
-    private fun getUniqueID(player: String): UUID? {
+    fun getUniqueID(player: String): UUID? {
         var offline = player
         val online = plugin!!.server.getPlayer(player)
         if (online == null) {
@@ -115,6 +118,13 @@ class MapAgent(private val plugin: MapManager?) {
         return if (uuid == null) CompletableFuture.supplyAsync { null } else luckPerms?.userManager?.loadUser(uuid)
     }
 
+    /**
+     * 创建一个新的世界，并将其注册到权限管理中。
+     *
+     * @param world 世界名称。
+     * @param owner 世界拥有者的玩家名。
+     * @param group 权限组名称。
+     */
     fun newWorld(world: String?, owner: String?, group: String?) {
         val w = world?.lowercase(Locale.getDefault())
         val g = group?.lowercase(Locale.getDefault())
@@ -173,6 +183,12 @@ class MapAgent(private val plugin: MapManager?) {
         return true
     }
 
+    /**
+     * 从LuckPerms权限管理中删除一个世界及其相关的权限信息。
+     *
+     * @param world 要删除的世界名称。
+     * @return 如果成功删除，返回true；否则返回false。
+     */
     fun deleteWorld(world: String?): Boolean {
         val worldNode = getWorldNode(world)
         val groupNode = getWorldGroup(world)
@@ -244,6 +260,14 @@ class MapAgent(private val plugin: MapManager?) {
         return dynamicWorld!!.removeWorld(world)
     }
 
+    /**
+     * 为指定世界的指定权限组添加一个玩家。
+     *
+     * @param world 世界名称。
+     * @param group 权限组（管理员、建筑师、访客之一）。
+     * @param player 玩家名称。
+     * @return 操作成功返回true，否则返回false。
+     */
     fun addPlayer(world: String?, group: MapGroup?, player: String?): Boolean {
         val worldGroup = getWorldGroupName(world)
         if (world == "__nil") {
@@ -311,6 +335,14 @@ class MapAgent(private val plugin: MapManager?) {
         return true
     }
 
+    /**
+     * 从指定世界的指定权限组中移除一个玩家。
+     *
+     * @param world 世界名称。
+     * @param group 权限组索引（0为管理员，1为建筑师，2为访客）。
+     * @param player 玩家名称。
+     * @return 操作成功返回true，否则返回false。
+     */
     fun removePlayer(world: String?, group: Int, player: String?): Boolean {
         val worldGroup = getWorldGroupName(world)
         if (world == "__nil") {
@@ -371,6 +403,12 @@ class MapAgent(private val plugin: MapManager?) {
         return true
     }
 
+    /**
+     * 将指定世界设置为公开状态。
+     *
+     * @param world 世界名称。
+     * @return 操作成功返回true，否则返回false。
+     */
     fun publicizeWorld(world: String?): Boolean {
         val lp = luckPerms?.groupManager?.getGroup("apply")
         if (lp == null) {
@@ -385,6 +423,12 @@ class MapAgent(private val plugin: MapManager?) {
         return true
     }
 
+    /**
+     * 将指定世界设置为私有状态。
+     *
+     * @param world 世界名称。
+     * @return 操作成功返回true，否则返回false。
+     */
     fun privatizeWorld(world: String?): Boolean {
         val lp = luckPerms?.groupManager?.getGroup("apply")
         if (lp == null) {
@@ -400,12 +444,25 @@ class MapAgent(private val plugin: MapManager?) {
         return true
     }
 
+    /**
+     * 判断指定的世界是否为公共世界。
+     *
+     * @param world 要检查的世界名称。
+     * @return 如果世界为公共世界，返回true，否则返回false。
+     */
     fun isPublic(world: String?): Boolean {
         val color = dynamicWorld?.getMVWorld(world)?.color
         return color == ChatColor.GOLD || color == ChatColor.DARK_GREEN
     }
 
     //name -> group name | world name
+    /**
+     * 获取指定名称的玩家集合，基于指定的权限组筛选。
+     *
+     * @param name 世界名称或权限组名称。
+     * @param group 权限组枚举（管理员、建筑师、访客）。
+     * @return 包含玩家名称的CompletableFuture实例。
+     */
     fun getPlayers(name: String?, group: MapGroup?): CompletableFuture<MutableSet<String?>?>? {
         val matcher = when (group) {
             ADMIN -> NodeMatcher.key<Node?>(
@@ -428,11 +485,11 @@ class MapAgent(private val plugin: MapManager?) {
 
             null -> return CompletableFuture.completedFuture(mutableSetOf())
         }
-        return matcher?.let {
+        return matcher?.let { it ->
             luckPerms?.userManager?.searchAll(it)
                 ?.thenApplyAsync { results: MutableMap<UUID?, MutableCollection<Node?>?>? ->
                     results?.keys?.stream()
-                        ?.map { id: UUID? -> id?.let { it -> Bukkit.getOfflinePlayer(it) } }
+                        ?.map { id: UUID? -> id?.let { Bukkit.getOfflinePlayer(it) } }
                         ?.map { obj: OfflinePlayer? -> obj?.name }
                         ?.filter { obj: String? -> Objects.nonNull(obj) }
                         ?.collect(Collectors.toSet())
@@ -449,6 +506,11 @@ class MapAgent(private val plugin: MapManager?) {
         )
     }
 
+    /**
+     * 与LuckPerms插件同步数据，更新本地存储的玩家权限信息。
+     *
+     * @param sender 命令发送者，用于回显操作结果。
+     */
     fun syncWithLuckPerms(sender: CommandSender?) {
         val nodeMapBackup = ConcurrentHashMap(nodeMap)
         val groupMapBackup = ConcurrentHashMap(groupMap)
@@ -508,92 +570,174 @@ class MapAgent(private val plugin: MapManager?) {
 
 
     //Getters and setters
+    /**
+     * 设置全局物理规则状态。
+     *
+     * @param physical 新的物理规则状态。
+     */
     fun setPhysical(physical: Boolean?) {
         Companion.physical = physical
         config?.setPhysical(physical)
         yaml?.save(config)
     }
 
+    /**
+     * 设置指定世界的物理规则状态。
+     *
+     * @param world 世界名称。
+     * @param physical 新的物理规则状态。
+     */
     fun setPhysical(world: String?, physical: Boolean) {
         getWorldNode(world)?.setPhysical(physical)
     }
 
+    /**
+     * 获取指定世界的物理规则状态。
+     *
+     * @param world 世界名称。
+     * @return 指定世界的物理规则状态。
+     */
     fun isPhysical(world: String?): Boolean {
         return physical ?: (getWorldNode(world)?.isPhysical() == true)
     }
 
+    /**
+     * 设置全局爆炸破坏状态。
+     *
+     * @param exploded 新的爆炸破坏状态。
+     */
     fun setExploded(exploded: Boolean?) {
         Companion.exploded = exploded
         config?.setExploded(exploded)
         yaml?.save(config)
     }
 
+    /**
+     * 设置指定世界的爆炸破坏状态。
+     *
+     * @param world 世界名称。
+     * @param exploded 新的爆炸破坏状态。
+     */
     fun setExploded(world: String?, exploded: Boolean) {
         getWorldNode(world)?.setExploded(exploded)
     }
 
+    /**
+     * 获取指定世界的爆炸破坏状态。
+     *
+     * @param world 世界名称。
+     * @return 指定世界的爆炸破坏状态。
+     */
     fun isExploded(world: String?): Boolean {
         return exploded ?: (getWorldNode(world)?.isExploded() == true)
     }
 
+    /**
+     * 获取指定世界的权限组名称。
+     *
+     * @param world 世界名称。
+     * @return 权限组名称，如果世界未指定权限组，则返回null。
+     */
     fun getWorldGroupName(world: String?): String? {
         return nodeMap?.getOrDefault(world, nullWorldNode)?.getGroup()
     }
 
+    /**
+     * 获取指定世界的管理员集合。
+     *
+     * @param world 指定的世界对象。
+     * @return 该世界的管理员用户名集合。
+     */
     fun getAdminSet(world: World?): MutableSet<String?>? {
         return getWorldGroup(world?.name)?.getAdmins()
     }
 
+    /**
+     * 获取指定世界的建筑师集合。
+     *
+     * @param world 指定的世界对象。
+     * @return 该世界的建筑师用户名集合。
+     */
     fun getBuilderSet(world: World?): MutableSet<String?>? {
         return getWorldGroup(world?.name)?.getBuilders()
     }
 
+    /**
+     * 获取指定世界的访客集合。
+     *
+     * @param world 指定的世界对象。
+     * @return 该世界的访客用户名集合。
+     */
     fun getVisitorSet(world: World?): MutableSet<String?>? {
         return getWorldNode(world?.name)?.getVisitors()
     }
 
-    fun addAdmin(world: String?, player: String?): Boolean {
+    private fun addAdmin(world: String?, player: String?): Boolean {
         return getWorldGroup(world)?.addAdmin(player) == true
     }
 
-    fun addBuilder(world: String?, player: String?): Boolean {
+    private fun addBuilder(world: String?, player: String?): Boolean {
         return getWorldGroup(world)?.addBuilder(player) == true
     }
 
-    fun addVisitor(world: String?, player: String?): Boolean {
+    private fun addVisitor(world: String?, player: String?): Boolean {
         return getWorldNode(world)?.addVisitor(player) == true
     }
 
-    fun removeAdmin(world: String?, player: String?): Boolean {
+    private fun removeAdmin(world: String?, player: String?): Boolean {
         return getWorldGroup(world)?.removeAdmin(player) == true
     }
 
-    fun removeBuilder(world: String?, player: String?): Boolean {
+    private fun removeBuilder(world: String?, player: String?): Boolean {
         return getWorldGroup(world)?.removeBuilder(player) == true
     }
 
-    fun removeVisitor(world: String?, player: String?): Boolean {
+    private fun removeVisitor(world: String?, player: String?): Boolean {
         return getWorldNode(world)?.removeVisitor(player) == true
     }
 
+    /**
+     * 获取当前所有MapManager所管理的世界的节点映射。
+     *
+     * @return 包含所有MapManager所管理的世界及其对应节点信息的映射表。世界名称作为键，对应的[WorldNode]作为值。
+     */
     fun getNodeMap(): MutableMap<String?, WorldNode?>? {
         return nodeMap
     }
 
+    /**
+     * 获取当前所有权限组的映射。
+     *
+     * @return 包含所有权限组及其对应信息的映射表。权限组名称作为键，对应的[WorldGroup]作为值。
+     */
     fun getGroupMap(): MutableMap<String?, WorldGroup?>? {
         return groupMap
     }
 
+    /**
+     * 检查指定的世界是否被MapManager所管理。
+     *
+     * @param world 要检查的世界名称。
+     * @return 如果指定的世界被MapManager所管理，返回true；否则返回false。
+     */
     fun containsWorld(world: String?): Boolean {
         return nodeMap?.containsKey(world) == true
     }
 
+    /**
+     * 获取当前所有MapManager所管理的世界的名称。
+     *
+     * @return 一个包含所有MapManager所管理的世界名称的集合。
+     */
     fun getWorlds(): MutableSet<String?> {
         return nodeMap?.keys!!
     }
 
     companion object {
+        // 全局物理效果设置。当设置为true时，启用全局物理效果；否则禁用。
         private var physical: Boolean? = null
+
+        // 全局爆炸效果设置。当设置为true时，启用全局爆炸效果；否则禁用。
         private var exploded: Boolean? = null
     }
 }
