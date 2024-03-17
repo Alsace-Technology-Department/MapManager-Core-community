@@ -26,7 +26,7 @@ object LogFilterHelper {
         return Collections.unmodifiableList(commandList)
     }
 
-    fun containsAny(str: String?, pieces: Iterable<String?>?): Boolean {
+    private fun containsAny(str: String?, pieces: Iterable<String?>?): Boolean {
         if (str == null) {
             return false
         }

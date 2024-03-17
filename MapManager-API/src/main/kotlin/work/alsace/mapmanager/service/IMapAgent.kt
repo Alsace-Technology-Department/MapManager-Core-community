@@ -1,6 +1,5 @@
 package work.alsace.mapmanager.service
 
-import net.luckperms.api.LuckPerms
 import org.bukkit.World
 import work.alsace.mapmanager.pojo.WorldGroup
 import work.alsace.mapmanager.pojo.WorldNode
