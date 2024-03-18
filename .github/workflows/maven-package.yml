@@ -50,3 +50,8 @@ jobs:
           asset_path: ./MapManager-API/target/MapManager-API-${{ env.PROJECT_VERSION }}.jar
           asset_name: MapManager-API-${{ env.PROJECT_VERSION }}.jar
           asset_content_type: application/java-archive
+
+      - name: Deploy to GitHub Packages
+        run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
