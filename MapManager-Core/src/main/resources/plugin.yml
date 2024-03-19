@@ -2,7 +2,9 @@ name: MapManager-Core
 main: work.alsace.mapmanager.MapManager
 version: ${version}
 #description: '地图管理核心插件-社区版-1.16-1.19'
-depend: [LuckPerms, Multiverse-Core]
+depend:
+  - LuckPerms
+  - Multiverse-Core
 softdepend:
   - VoidGen
 api-version: 1.16

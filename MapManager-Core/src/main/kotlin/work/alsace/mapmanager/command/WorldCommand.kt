@@ -44,8 +44,6 @@ class WorldCommand(plugin: MapManager?, private var args: Array<String>?) : TabE
         "kick",
         "setspawn",
         "setname",
-        "download",
-        "changepassword"
     )
     private val subCommandToggle: MutableList<String?> =
         mutableListOf("on", "enable", "true", "yes", "off", "disable", "false", "no", "info", "status")

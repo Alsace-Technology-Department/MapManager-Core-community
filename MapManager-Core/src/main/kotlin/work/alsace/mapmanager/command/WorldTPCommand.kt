@@ -8,12 +8,11 @@ import work.alsace.mapmanager.MapManager
 import work.alsace.mapmanager.function.DynamicWorld
 import java.util.stream.Collectors
 
-class WorldTPCommand(plugin: MapManager?, private var dynamicWorld: DynamicWorld?) : TabExecutor {
+class WorldTPCommand(plugin: MapManager) : TabExecutor {
+    private var dynamicWorld: DynamicWorld? = null
 
     init {
-        if (plugin != null) {
-            this.dynamicWorld = plugin.getDynamicWorld()
-        }
+        this.dynamicWorld = plugin.getDynamicWorld()
     }
 
     override fun onTabComplete(

@@ -44,9 +44,9 @@ class MapManager : JavaPlugin() {
         registerCommand("world", WorldCommand(this, null))
         registerCommand("import", ImportCommand(this))
         registerCommand("delete", DeleteCommand(this))
-        registerCommand("mapadmin.md", MapAdminCommand(this))
+        registerCommand("mapadmin", MapAdminCommand(this))
         registerCommand("write", WriteCommand(this))
-        registerCommand("worldtp", WorldTPCommand(this, dynamicWorld))
+        registerCommand("worldtp", WorldTPCommand(this))
         registerCommand("create", CreateCommand(this))
         server.pluginManager.registerEvents(BlockListener(this), this)
         server.pluginManager.registerEvents(PlayerListener(dynamicWorld), this)
@@ -58,13 +58,13 @@ class MapManager : JavaPlugin() {
         server.consoleSender.sendMessage("[§6MapManager§7] §f已卸载")
     }
 
-    private fun registerCommand(cmd: String?, executor: CommandExecutor?) {
-        cmd?.let { getCommand(it)?.setExecutor(executor) }
+    private fun registerCommand(cmd: String, executor: CommandExecutor) {
+        cmd.let { getCommand(it)?.setExecutor(executor) }
     }
 
-    private fun registerCommand(cmd: String?, executor: TabExecutor?) {
-        Objects.requireNonNull(cmd?.let { getCommand(it) })?.setExecutor(executor)
-        Objects.requireNonNull(cmd?.let { getCommand(it) })?.tabCompleter = executor
+    private fun registerCommand(cmd: String, executor: TabExecutor) {
+        Objects.requireNonNull(getCommand(cmd))?.setExecutor(executor)
+        Objects.requireNonNull(getCommand(cmd))?.tabCompleter = executor
     }
 
     fun getDynamicWorld(): DynamicWorld? {
