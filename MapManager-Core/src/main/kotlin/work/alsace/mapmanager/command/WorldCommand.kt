@@ -1,11 +1,12 @@
 package work.alsace.mapmanager.command
 
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.ComponentBuilder
+import net.md_5.bungee.api.chat.HoverEvent
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Location
@@ -52,7 +53,7 @@ class WorldCommand(plugin: MapManager?, private var args: Array<String>?) : TabE
     private val cmdGuide: Component = Component.text("命令指南：", NamedTextColor.DARK_AQUA)
         .append(
             Component.text("点击打开链接", NamedTextColor.AQUA, TextDecoration.UNDERLINED)
-                .clickEvent(ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-UQ80dMRiaoXDH3xCZblc9STpnxb"))
+                .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-UQ80dMRiaoXDH3xCZblc9STpnxb"))
         )
 
     enum class Operation {
@@ -245,8 +246,8 @@ class WorldCommand(plugin: MapManager?, private var args: Array<String>?) : TabE
                 sender.sendMessage("§b有下列玩家为该地图的管理员（共" + admins.size + "人）：")
                 if (hasPermission(sender)) listMembers(
                     admins,
-                    NamedTextColor.DARK_AQUA,
-                    NamedTextColor.AQUA,
+                    ChatColor.DARK_AQUA,
+                    ChatColor.AQUA,
                     "admin",
                     "管理员"
                 ) else for (name in admins) sender.sendMessage(
@@ -314,8 +315,8 @@ class WorldCommand(plugin: MapManager?, private var args: Array<String>?) : TabE
                 sender.sendMessage("§e有下列玩家为该地图的建筑人员（共" + builders.size + "人）：")
                 if (hasPermission(sender)) listMembers(
                     builders,
-                    NamedTextColor.GOLD,
-                    NamedTextColor.YELLOW,
+                    ChatColor.GOLD,
+                    ChatColor.YELLOW,
                     "builder",
                     "建筑人员"
                 ) else for (name in builders) sender.sendMessage(
@@ -380,8 +381,8 @@ class WorldCommand(plugin: MapManager?, private var args: Array<String>?) : TabE
                 sender.sendMessage("§a有下列玩家可进来参观该地图（共" + visitors.size + "人）：")
                 if (hasPermission(sender)) listMembers(
                     visitors,
-                    NamedTextColor.DARK_GREEN,
-                    NamedTextColor.GREEN,
+                    ChatColor.DARK_GREEN,
+                    ChatColor.GREEN,
                     "visitor",
                     "参观"
                 ) else for (name in visitors) sender.sendMessage(
@@ -663,16 +664,23 @@ class WorldCommand(plugin: MapManager?, private var args: Array<String>?) : TabE
         return true
     }
 
-    private fun listMembers(set: MutableSet<String?>?, a: TextColor?, b: TextColor?, group: String?, perm: String?) {
-        if (set != null) {
-            for (name in set) {
-                if (name.isNullOrEmpty()) continue
-                val prefix: Component = Component.text("> ", a)
-                val body: Component = Component.text(name, b)
-                    .hoverEvent(HoverEvent.showText(Component.text("点击此处以取消" + name + "的" + perm + "资格")))
-                    .clickEvent(ClickEvent.suggestCommand("/world $group remove $name"))
-                sender?.sendMessage(prefix.append(body).toString())
-            }
+    private fun listMembers(set: MutableSet<String?>, a: ChatColor, b: ChatColor, group: String, perm: String) {
+        for (name in set) {
+            if (name?.isEmpty() == true) continue
+
+            val prefix = TextComponent("$a> ")
+            val body = TextComponent(b.toString() + name)
+            body.hoverEvent = HoverEvent(
+                HoverEvent.Action.SHOW_TEXT,
+                ComponentBuilder("点击此处以取消" + name + "的" + perm + "资格").create()
+            )
+            body.clickEvent = ClickEvent(
+                ClickEvent.Action.SUGGEST_COMMAND,
+                "/world $group remove $name"
+            )
+
+            sender!!.spigot().sendMessage(prefix, body)
         }
     }
+
 }

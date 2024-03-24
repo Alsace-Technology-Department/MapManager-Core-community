@@ -29,7 +29,7 @@ commands:
     usage: /mapadmin.md <operation>
     description: none.
   worldtp:
-    aliases: [wtp]
+    aliases: [ wtp ]
     usage: /worldtp <world name>
     description: Teleport you to a specific world.
   create:
