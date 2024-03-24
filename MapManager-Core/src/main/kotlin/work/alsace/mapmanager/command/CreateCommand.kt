@@ -1,6 +1,8 @@
 package work.alsace.mapmanager.command
 
-import org.bukkit.command.*
+import org.bukkit.command.Command
+import org.bukkit.command.CommandSender
+import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 import work.alsace.mapmanager.MapManager
 import java.util.*
@@ -47,6 +49,7 @@ class CreateCommand(private val plugin: MapManager?) : TabExecutor {
             }
         }
     }
+
     override fun onCommand(sender: CommandSender, cmd: Command, p2: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("mapmanager.command.create")) {
             sender.sendMessage("§c你没有权限使用此命令")

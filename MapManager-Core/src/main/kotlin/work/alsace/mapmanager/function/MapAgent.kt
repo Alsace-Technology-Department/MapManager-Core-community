@@ -31,7 +31,7 @@ import java.util.stream.Collectors
 /**
  * 地图管理代理，负责处理与LuckPerms权限插件的交互、管理世界及其权限组等功能。
  */
-open class MapAgent(private val plugin: MapManager?) : IMapAgent{
+open class MapAgent(private val plugin: MapManager?) : IMapAgent {
     private val nodeIO: FileIO<WorldNode?>?
     private val groupIO: FileIO<WorldGroup?>?
     private val yaml: MainYaml?
@@ -48,10 +48,8 @@ open class MapAgent(private val plugin: MapManager?) : IMapAgent{
     init {
         nodeIO = FileIO(plugin, "worlds", object : TypeToken<ConcurrentMap<String?, WorldNode?>?>() {})
         nodeMap = nodeIO.load()
-        if (nodeMap == null) nodeMap = ConcurrentHashMap()
         groupIO = FileIO(plugin, "groups", object : TypeToken<ConcurrentMap<String?, WorldGroup?>?>() {})
         groupMap = groupIO.load()
-        if (groupMap == null) groupMap = ConcurrentHashMap()
         yaml = MainYaml(plugin)
         config = yaml.load()
         val global = config?.getGlobal()
@@ -468,7 +466,9 @@ open class MapAgent(private val plugin: MapManager?) : IMapAgent{
                 PermissionNode.builder("mapmanager.admin." + (name?.lowercase(Locale.getDefault()))).build()
             )
 
-            IMapAgent.MapGroup.BUILDER -> name?.let { InheritanceNode.builder(it.lowercase(Locale.getDefault())).build() }?.let {
+            IMapAgent.MapGroup.BUILDER -> name?.let {
+                InheritanceNode.builder(it.lowercase(Locale.getDefault())).build()
+            }?.let {
                 NodeMatcher.key<Node?>(
                     it
                 )

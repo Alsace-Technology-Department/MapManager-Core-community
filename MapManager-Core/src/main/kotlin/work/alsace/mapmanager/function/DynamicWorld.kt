@@ -27,7 +27,7 @@ class DynamicWorld(private val plugin: MapManager?) : IDynamicWorld {
      * 获取Multiverse-Core的世界管理器。
      * @return MVWorldManager实例，如果Multiverse-Core插件不存在则为null。
      */
-   override fun getMVWorldManager(): MVWorldManager? {
+    override fun getMVWorldManager(): MVWorldManager? {
         return mv
     }
 
@@ -251,8 +251,9 @@ class DynamicWorld(private val plugin: MapManager?) : IDynamicWorld {
             plugin?.logger?.warning("§c未找到世界文件$name")
             return false
         }
-        if (!WorldNameChecker.isValidWorldFolder(file)) {
-            plugin?.logger?.warning("§c未发现" + name + "中的.dat文件")
+        val versionCheck = VersionCheck(plugin!!)
+        if (!versionCheck.isMapVersionCorrect(name)) {
+            plugin.logger.info("地图版本过高")
             return false
         }
         try {

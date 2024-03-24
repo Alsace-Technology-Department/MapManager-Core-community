@@ -1,6 +1,8 @@
 package work.alsace.mapmanager.command
 
-import org.bukkit.command.*
+import org.bukkit.command.Command
+import org.bukkit.command.CommandSender
+import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 import work.alsace.mapmanager.MapManager
 import java.util.*

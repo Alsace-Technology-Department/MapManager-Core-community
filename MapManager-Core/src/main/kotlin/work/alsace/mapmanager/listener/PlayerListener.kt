@@ -22,7 +22,9 @@ class PlayerListener(private val dynamicWorld: DynamicWorld?) : Listener {
     @EventHandler
     fun onPlayerChangeWorld(event: PlayerChangedWorldEvent?) {
         val world = event?.from
-        if (world?.name?.let { dynamicWorld?.isExtraLoad(it) } == true && world?.players?.size!! <= 0) dynamicWorld?.unloadWorldLater(world.name)
+        if (world?.name?.let { dynamicWorld?.isExtraLoad(it) } == true && world?.players?.size!! <= 0) dynamicWorld?.unloadWorldLater(
+            world.name
+        )
         event?.player?.world?.name?.let { dynamicWorld?.cancelUnloadTask(it) }
     }
 }
