@@ -13,8 +13,8 @@ import java.io.IOException
 
 class VersionCheck(private val plugin: MapManager) {
     /**
-     * 检测地图文件版本是否合法
-     * @param world 主目录的地图
+     * 检测主目录下地图文件版本是否合法
+     * @param world String 地图名
      * @return true为合法，false不合法
      */
     fun isMapVersionCorrect(world: String): Boolean {
@@ -30,7 +30,7 @@ class VersionCheck(private val plugin: MapManager) {
 
     /**
      * 检测地图文件版本是否合法
-     * @param dir 地图文件夹
+     * @param dir File 地图文件夹
      * @return true为合法，false不合法
      */
     fun isMapVersionCorrect(dir: File): Boolean {
