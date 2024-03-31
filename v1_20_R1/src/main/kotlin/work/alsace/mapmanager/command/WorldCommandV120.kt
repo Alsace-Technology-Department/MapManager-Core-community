@@ -1,4 +1,4 @@
-package command
+package work.alsace.mapmanager.command
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent

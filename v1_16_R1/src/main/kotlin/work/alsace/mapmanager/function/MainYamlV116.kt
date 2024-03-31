@@ -1,4 +1,4 @@
-package function
+package work.alsace.mapmanager.function
 
 import org.bukkit.plugin.Plugin
 import org.yaml.snakeyaml.DumperOptions

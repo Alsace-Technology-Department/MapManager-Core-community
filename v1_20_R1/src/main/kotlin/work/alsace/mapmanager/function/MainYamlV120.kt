@@ -1,4 +1,4 @@
-package function
+package work.alsace.mapmanager.function
 
 import org.bukkit.plugin.Plugin
 import org.yaml.snakeyaml.DumperOptions
@@ -25,7 +25,8 @@ class MainYamlV120(plugin: Plugin) : IMainYaml {
         options.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
         options.isPrettyFlow = true
         val constructor: Constructor =
-            CustomClassLoaderConstructor(MainYamlV120::class.java.classLoader,
+            CustomClassLoaderConstructor(
+                MainYamlV120::class.java.classLoader,
                 LoaderOptions())
         val representer = Representer(options)
         val description = TypeDescription(MainConfig::class.java, Tag("!MapManagerConfig"))

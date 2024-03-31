@@ -1,4 +1,4 @@
-package command
+package work.alsace.mapmanager.command
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -14,7 +14,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
-import command.WorldCommandV116.Operation.*
+import work.alsace.mapmanager.command.WorldCommandV116.Operation.*
 import work.alsace.mapmanager.IMapManager
 import work.alsace.mapmanager.service.IDynamicWorld
 import work.alsace.mapmanager.service.IMapAgent

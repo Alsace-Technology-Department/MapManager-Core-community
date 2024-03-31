@@ -1,9 +1,9 @@
 package work.alsace.mapmanager.common.function
 
-import command.WorldCommandV116
-import command.WorldCommandV120
-import function.MainYamlV116
-import function.MainYamlV120
+import work.alsace.mapmanager.command.WorldCommandV116
+import work.alsace.mapmanager.command.WorldCommandV120
+import work.alsace.mapmanager.function.MainYamlV116
+import work.alsace.mapmanager.function.MainYamlV120
 import work.alsace.mapmanager.MapManager
 
 class VersionBridge {
