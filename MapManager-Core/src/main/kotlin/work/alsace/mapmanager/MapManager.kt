@@ -29,21 +29,23 @@ class MapManager : JavaPlugin(), IMapManager {
 
     override fun onEnable() {
         server.consoleSender.sendMessage("[§6MapManager§7] §f启动中...")
-        VersionBridge().serverVersionChecks(this)
+
         logger.info("正在加载配置...")
         try {
             loadConfig()
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-        logger.info("正在获取LuckPerms API...")
-        this.dynamicWorld = DynamicWorld(this)
-        this.mapAgent = MapAgent(this)
 
+        logger.info("正在获取LuckPerms API...")
         (LogManager.getRootLogger() as Logger).addFilter(Log4JFilter())
         this.luckPerms = Bukkit.getServicesManager().getRegistration(LuckPerms::class.java)?.provider
         mapAgent?.setLuckPerms(luckPerms)
         initPermission()
+
+        VersionBridge().serverVersionChecks(this)
+        this.dynamicWorld = DynamicWorld(this)
+        this.mapAgent = MapAgent(this)
 
         logger.info("正在注册指令和事件...")
         registerCommand("import", ImportCommand(this))

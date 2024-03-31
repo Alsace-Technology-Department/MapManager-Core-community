@@ -18,15 +18,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Extract project version
-        id: project_version
-        run: echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
-
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
+      - name: Build with Gradle
+        run: ./gradlew build
 
       - name: List build artifacts for Core
-        run: ls -lah ./MapManager-Core/target/
+        run: ls -lah ./MapManager-Core/build/libs/
 
       - name: Upload Core Artifact to GitHub Release
         uses: actions/upload-release-asset@v1
@@ -34,12 +30,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./MapManager-Core/target/MapManager-Core-${{ env.PROJECT_VERSION }}.jar
-          asset_name: MapManager-Core-${{ env.PROJECT_VERSION }}.jar
+          asset_path: ./MapManager-Core/build/libs/MapManager-Core-${{ github.event.release.tag_name }}.jar
+          # Assuming the tag name is used as the version. Adjust if necessary.
+          asset_name: MapManager-Core-${{ github.event.release.tag_name }}.jar
           asset_content_type: application/java-archive
 
       - name: List build artifacts for API
-        run: ls -lah ./MapManager-API/target/
+        run: ls -lah ./MapManager-API/build/libs/
 
       - name: Upload API Artifact to GitHub Release
         uses: actions/upload-release-asset@v1
@@ -47,6 +44,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./MapManager-API/target/MapManager-API-${{ env.PROJECT_VERSION }}.jar
-          asset_name: MapManager-API-${{ env.PROJECT_VERSION }}.jar
+          asset_path: ./MapManager-API/build/libs/MapManager-API-${{ github.event.release.tag_name }}.jar
+          # Adjust the asset_path if your Gradle project configuration produces a different jar name
+          asset_name: MapManager-API-${{ github.event.release.tag_name }}.jar
           asset_content_type: application/java-archive
