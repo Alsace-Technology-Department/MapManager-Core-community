@@ -9,22 +9,27 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.TabExecutor
 import org.bukkit.plugin.java.JavaPlugin
-import work.alsace.mapmanager.command.*
-import work.alsace.mapmanager.function.DynamicWorld
-import work.alsace.mapmanager.function.MapAgent
-import work.alsace.mapmanager.listener.BlockListener
-import work.alsace.mapmanager.listener.PlayerListener
-import work.alsace.mapmanager.log.Log4JFilter
+import work.alsace.mapmanager.common.command.*
+import work.alsace.mapmanager.common.function.DynamicWorld
+import work.alsace.mapmanager.service.IMainYaml
+import work.alsace.mapmanager.common.function.MapAgent
+import work.alsace.mapmanager.common.function.VersionBridge
+import work.alsace.mapmanager.common.listener.BlockListener
+import work.alsace.mapmanager.common.listener.PlayerListener
+import work.alsace.mapmanager.common.log.Log4JFilter
 import java.io.File
 import java.io.IOException
 import java.util.*
 
-class MapManager : JavaPlugin() {
+class MapManager : JavaPlugin(), IMapManager {
     private var dynamicWorld: DynamicWorld? = null
     private var mapAgent: MapAgent? = null
     private var luckPerms: LuckPerms? = null
+    private var yaml: IMainYaml? = null
+
     override fun onEnable() {
         server.consoleSender.sendMessage("[§6MapManager§7] §f启动中...")
+        VersionBridge().serverVersionChecks(this)
         logger.info("正在加载配置...")
         try {
             loadConfig()
@@ -41,7 +46,6 @@ class MapManager : JavaPlugin() {
         initPermission()
 
         logger.info("正在注册指令和事件...")
-        registerCommand("world", WorldCommand(this, null))
         registerCommand("import", ImportCommand(this))
         registerCommand("delete", DeleteCommand(this))
         registerCommand("mapadmin", MapAdminCommand(this))
@@ -62,21 +66,29 @@ class MapManager : JavaPlugin() {
         cmd.let { getCommand(it)?.setExecutor(executor) }
     }
 
-    private fun registerCommand(cmd: String, executor: TabExecutor) {
+    fun registerCommand(cmd: String, executor: TabExecutor) {
         Objects.requireNonNull(getCommand(cmd))?.setExecutor(executor)
         Objects.requireNonNull(getCommand(cmd))?.tabCompleter = executor
     }
 
-    fun getDynamicWorld(): DynamicWorld? {
+    override fun getDynamicWorld(): DynamicWorld? {
         return dynamicWorld
     }
 
-    fun getMapAgent(): MapAgent? {
+    override fun getMapAgent(): MapAgent? {
         return mapAgent
     }
 
-    fun getLuckPerms(): LuckPerms? {
+    override fun getLuckPerms(): LuckPerms? {
         return luckPerms
+    }
+
+    override fun getMainYaml(): IMainYaml? {
+        return yaml
+    }
+
+    override fun setMainYaml(yaml: IMainYaml) {
+        this.yaml = yaml
     }
 
     @Throws(IOException::class)

@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>MapManager-API</artifactId>
+    <artifactId>v1_16_R1</artifactId>
 
     <dependencies>
         <dependency>
@@ -29,6 +29,12 @@
         <dependency>
             <groupId>net.luckperms</groupId>
             <artifactId>api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>work.alsace.mapmanager</groupId>
+            <artifactId>MapManager-API</artifactId>
+            <version>3.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.destroystokyo.paper</groupId>
@@ -78,5 +84,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>

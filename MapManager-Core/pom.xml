@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>work.alsace.mapmanager</groupId>
@@ -17,7 +17,18 @@
         <dependency>
             <groupId>work.alsace.mapmanager</groupId>
             <artifactId>MapManager-API</artifactId>
-            <version>${project.version}</version>
+            <version>3.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>work.alsace.mapmanager</groupId>
+            <artifactId>v1_16_R1</artifactId>
+            <version>3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>work.alsace.mapmanager</groupId>
+            <artifactId>v1_20_R1</artifactId>
+            <version>3.0</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -33,28 +44,24 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
+            <version>4.14.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>2.17.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>2.14.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.Querz</groupId>
             <artifactId>NBT</artifactId>
+            <version>6.1</version>
         </dependency>
-        <!-- 由服务器环境提供 -->
-        <dependency>
-            <groupId>com.destroystokyo.paper</groupId>
-            <artifactId>paper-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-        </dependency>
+        <!-- 插件依赖，由服务器提供 -->
         <dependency>
             <groupId>com.onarandombox.multiversecore</groupId>
             <artifactId>Multiverse-Core</artifactId>
@@ -63,9 +70,43 @@
             <groupId>net.luckperms</groupId>
             <artifactId>api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>mc1_16</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.destroystokyo.paper</groupId>
+                    <artifactId>paper-api</artifactId>
+                    <version>1.16.5-R0.1-SNAPSHOT</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>mc1_19</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.papermc.paper</groupId>
+                    <artifactId>paper-api</artifactId>
+                    <version>1.20.1-R0.1-SNAPSHOT</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <build>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -96,6 +137,10 @@
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
                 <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
                     <execution>
                         <id>compile</id>
                         <phase>compile</phase>
