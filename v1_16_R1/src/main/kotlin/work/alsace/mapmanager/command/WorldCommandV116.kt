@@ -1,8 +1,5 @@
 package work.alsace.mapmanager.command
 
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
@@ -14,8 +11,8 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
-import work.alsace.mapmanager.command.WorldCommandV116.Operation.*
 import work.alsace.mapmanager.IMapManager
+import work.alsace.mapmanager.command.WorldCommandV116.Operation.*
 import work.alsace.mapmanager.service.IDynamicWorld
 import work.alsace.mapmanager.service.IMapAgent
 import work.alsace.mapmanager.service.IMapAgent.MapGroup
@@ -29,8 +26,8 @@ import java.util.stream.Stream
 class WorldCommandV116(plugin: IMapManager) : TabExecutor {
     private var args: Array<String>? = null
     private var sender: CommandSender? = null
-    private val dynamicWorld: IDynamicWorld? = plugin.getDynamicWorld()
-    private val mapAgent: IMapAgent? = plugin.getMapAgent()
+    private val dynamicWorld: IDynamicWorld = plugin.getDynamicWorld()
+    private val mapAgent: IMapAgent = plugin.getMapAgent()
     private val subCommand1: MutableList<String?> = mutableListOf(
         "admin",
         "admins",
@@ -51,11 +48,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
         mutableListOf("on", "enable", "true", "yes", "off", "disable", "false", "no", "info", "status")
     private val emptyList: MutableList<String?> = ArrayList(0)
     private val format: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
-    private val cmdGuide: Component = Component.text("命令指南：", NamedTextColor.DARK_AQUA)
-        .append(
-            Component.text("点击打开链接", NamedTextColor.AQUA, TextDecoration.UNDERLINED)
-                .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-UQ80dMRiaoXDH3xCZblc9STpnxb"))
-        )
+
 
     enum class Operation {
         ENABLE,
@@ -143,8 +136,8 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                         }
 
                         "tp" -> {
-                            dynamicWorld?.getWorlds(args[0])?.stream()
-                                ?.filter { world: String? -> sender.hasPermission("multiverse.access.$world") }
+                            dynamicWorld.getWorlds(args[0]).stream()
+                                .filter { world: String? -> sender.hasPermission("multiverse.access.$world") }
                                 ?.collect(Collectors.toList())
                         }
 
@@ -157,7 +150,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
 
             3 -> {
                 //final WorldNode node = mapAgent.getWorldNode(player.getWorld().getName());
-                if (sender.hasPermission("mapmanager.admin." + mapAgent!!.getWorldGroupName(sender.world.name))) {
+                if (sender.hasPermission("mapmanager.admin." + mapAgent.getWorldGroupName(sender.world.name))) {
                     if (args[1].equals("add", ignoreCase = true)) {
                         when (args[0].lowercase(Locale.getDefault())) {
                             "admin", "builder", "visitor" -> null
@@ -202,20 +195,20 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                     return false
                 }
                 if (args[1].equals("add", ignoreCase = true)) {
-                    if (mapAgent?.addPlayer(
+                    if (mapAgent.addPlayer(
                             sender.world.name,
                             MapGroup.ADMIN,
                             args[2]
-                        ) == true
+                        )
                     ) sender.sendMessage("§a已将玩家" + args[2] + "设置为该地图的管理员") else sender.sendMessage(
                         "§c权限修改时出现错误，请联系管理员以修复该错误"
                     )
                 } else if (args[1].equals("remove", ignoreCase = true)) {
-                    if (mapAgent?.removePlayer(
+                    if (mapAgent.removePlayer(
                             sender.world.name,
                             0,
                             args[2]
-                        ) == true
+                        )
                     ) {
                         sender.sendMessage("§a已取消玩家" + args[2] + "在该地图内的管理员资格")
                     } else {
@@ -230,7 +223,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
 
             "admins" -> {
                 val admins: MutableSet<String?>? = try {
-                    mapAgent?.getPlayers(mapAgent.getWorldGroupName(sender.world.name), MapGroup.ADMIN)?.get()
+                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name), MapGroup.ADMIN)?.get()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                     sender.sendMessage("§c管理员列表查询失败，请联系管理员以解决该问题")
@@ -263,7 +256,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                     return false
                 }
                 if (args[1].equals("add", ignoreCase = true)) {
-                    if (mapAgent?.addPlayer(
+                    if (mapAgent.addPlayer(
                             sender.world.name,
                             MapGroup.BUILDER,
                             args[2]
@@ -276,7 +269,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                         )
                     }
                 } else if (args[1].equals("remove", ignoreCase = true)) {
-                    if (mapAgent?.removePlayer(
+                    if (mapAgent.removePlayer(
                             sender.world.name,
                             1,
                             args[2]
@@ -294,12 +287,12 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
             }
 
             "builders" -> {
-                if (dynamicWorld?.getMVWorld(sender.world.name)!!.color == ChatColor.GOLD) {
+                if (dynamicWorld.getMVWorld(sender.world.name)!!.color == ChatColor.GOLD) {
                     sender.sendMessage("§e该地图为公共地图，所有玩家均可进入并自由建筑")
                     return false
                 }
                 val builders: MutableSet<String?>? = try {
-                    mapAgent?.getPlayers(mapAgent.getWorldGroupName(sender.world.name), MapGroup.BUILDER)?.get()
+                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name), MapGroup.BUILDER)?.get()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                     sender.sendMessage("§c管理员列表查询失败，请联系管理员以解决该问题")
@@ -332,22 +325,22 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                     return false
                 }
                 if (args[1].equals("add", ignoreCase = true)) {
-                    if (mapAgent?.addPlayer(
+                    if (mapAgent.addPlayer(
                             sender.world.name,
                             MapGroup.VISITOR,
                             args[2]
-                        ) == true
+                        )
                     ) sender.sendMessage("§a玩家" + args[2] + "现在可以来参观你的地图了") else {
                         sender.sendMessage(
                             "§c权限修改时出现错误，请联系管理员以修复该错误"
                         )
                     }
                 } else if (args[1].equals("remove", ignoreCase = true)) {
-                    if (mapAgent?.removePlayer(
+                    if (mapAgent.removePlayer(
                             sender.world.name,
                             2,
                             args[2]
-                        ) == true
+                        )
                     ) sender.sendMessage("§a玩家" + args[2] + "将不能参观你的地图了") else sender.sendMessage("§c权限修改时出现错误，请联系管理员以修复该错误")
                 } else {
                     sender.sendMessage("§c给某玩家添加/移除参观权限： /world visitor add/remove <玩家id>")
@@ -355,7 +348,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
             }
 
             "visitors" -> {
-                val color = dynamicWorld!!.getMVWorld(sender.world.name)?.color
+                val color = dynamicWorld.getMVWorld(sender.world.name)?.color
                 if (color == ChatColor.GOLD) {
                     sender.sendMessage("§a该地图为公共地图，所有玩家均可进入并自由建筑")
                     return false
@@ -365,7 +358,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                     return false
                 }
                 val visitors: MutableSet<String?>? = try {
-                    mapAgent?.getPlayers(sender.world.name, MapGroup.VISITOR)?.get()
+                    mapAgent.getPlayers(sender.world.name, MapGroup.VISITOR)?.get()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                     sender.sendMessage("§c参观人员列表查询失败，请联系管理员以解决该问题")
@@ -407,7 +400,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                     sender.sendMessage("§c玩家" + args[1] + "未在你的世界中")
                     return false
                 }
-                dynamicWorld?.getSpawnLocation()?.let { kicked.teleport(it) }
+                dynamicWorld.getSpawnLocation()?.let { kicked.teleport(it) }
                 kicked.sendMessage("§c你被" + sender.getName() + "从他的世界中请出")
                 sender.sendMessage("§a已将玩家" + args[1] + "从你的世界中请出")
             }
@@ -431,7 +424,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                     sender.sendMessage("§c名称过长，最多允许16个字符")
                     return false
                 }
-                val world = dynamicWorld?.getMVWorld(sender.world.name)
+                val world = dynamicWorld.getMVWorld(sender.world.name)
                 val result = ignoreColor(args[1], world?.color)
                 if (world != null) {
                     world.alias = result
@@ -445,25 +438,25 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                 if (noPermission(sender)) return false
                 if (args.size < 2) {
                     //show the status;
-                    sender.sendMessage("§b当前地图已 " + (if (mapAgent?.isPhysical(sender.world.name) == true) "开启" else "关闭") + " 方块更新")
+                    sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 方块更新")
                     return false
                 }
                 when (getOperation(args[1])) {
                     ENABLE -> {
                         //set to true
-                        mapAgent?.setPhysical(sender.world.name, true)
+                        mapAgent.setPhysical(sender.world.name, true)
                         sender.sendMessage("§a已开启方块更新")
                     }
 
                     DISABLE -> {
                         //set to false
-                        mapAgent?.setPhysical(sender.world.name, false)
+                        mapAgent.setPhysical(sender.world.name, false)
                         sender.sendMessage("§a已关闭方块更新")
                     }
 
                     STATUS -> {
                         //show the status
-                        sender.sendMessage("§b当前地图已 " + (if (mapAgent?.isPhysical(sender.world.name) == true) "开启" else "关闭") + " 方块更新")
+                        sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 方块更新")
                     }
 
                     null -> {
@@ -476,25 +469,25 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                 if (noPermission(sender)) return false
                 if (args.size < 2) {
                     //show the status;
-                    sender.sendMessage("§b当前地图已 " + (if (mapAgent?.isExploded(sender.world.name) == true) "开启" else "关闭") + " 爆炸破坏")
+                    sender.sendMessage("§b当前地图已 " + (if (mapAgent.isExploded(sender.world.name)) "开启" else "关闭") + " 爆炸破坏")
                     return false
                 }
                 when (getOperation(args[1])) {
                     ENABLE -> {
                         //set to true
-                        mapAgent?.setExploded(sender.world.name, true)
+                        mapAgent.setExploded(sender.world.name, true)
                         sender.sendMessage("§a已开启爆炸破坏")
                     }
 
                     DISABLE -> {
                         //set to false
-                        mapAgent?.setExploded(sender.world.name, false)
+                        mapAgent.setExploded(sender.world.name, false)
                         sender.sendMessage("§a已关闭爆炸破坏")
                     }
 
                     STATUS -> {
                         //show the status
-                        sender.sendMessage("§b当前地图已 " + (if (mapAgent?.isPhysical(sender.world.name) == true) "开启" else "关闭") + " 爆炸破坏")
+                        sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 爆炸破坏")
                     }
 
                     null -> {
@@ -509,7 +502,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                     //show the status;
                     sender.sendMessage(
                         "§b当前地图已 "
-                                + (if (dynamicWorld?.getMVWorld(sender.world.name)
+                                + (if (dynamicWorld.getMVWorld(sender.world.name)
                                 ?.isPVPEnabled == true
                         ) "开启" else "关闭")
                                 + " PVP"
@@ -519,13 +512,13 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                 when (getOperation(args[1])) {
                     ENABLE -> {
                         //set to true
-                        dynamicWorld?.getMVWorld(sender.world.name)?.setPVPMode(true)
+                        dynamicWorld.getMVWorld(sender.world.name)?.setPVPMode(true)
                         sender.sendMessage("§a已开启PVP")
                     }
 
                     DISABLE -> {
                         //set to false
-                        dynamicWorld?.getMVWorld(sender.world.name)?.setPVPMode(false)
+                        dynamicWorld.getMVWorld(sender.world.name)?.setPVPMode(false)
                         sender.sendMessage("§a已关闭PVP")
                     }
 
@@ -533,7 +526,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                         //show the status
                         sender.sendMessage(
                             "§b当前地图已 "
-                                    + (if (dynamicWorld?.getMVWorld(sender.world.name)
+                                    + (if (dynamicWorld.getMVWorld(sender.world.name)
                                     ?.isPVPEnabled == true
                             ) "开启" else "关闭")
                                     + " PVP"
@@ -550,27 +543,27 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                 if (noPermission(sender)) return false
                 if (args.size < 2) {
                     //show the status;
-                    sender.sendMessage("§b当前地图已 " + if (mapAgent?.isPublic(sender.world.name) == true) "公开" else "未公开")
+                    sender.sendMessage("§b当前地图已 " + if (mapAgent.isPublic(sender.world.name)) "公开" else "未公开")
                     return false
                 }
                 when (getOperation(args[1])) {
                     ENABLE -> {
                         //set to true
-                        if (mapAgent?.publicizeWorld(sender.world.name) == true) sender.sendMessage("§a已公开地图") else sender.sendMessage(
+                        if (mapAgent.publicizeWorld(sender.world.name)) sender.sendMessage("§a已公开地图") else sender.sendMessage(
                             "§c公开失败，请联系管理员以解决该问题"
                         )
                     }
 
                     DISABLE -> {
                         //set to false
-                        if (mapAgent?.privatizeWorld(sender.world.name) == true) sender.sendMessage("§a已取消公开地图") else sender.sendMessage(
+                        if (mapAgent.privatizeWorld(sender.world.name)) sender.sendMessage("§a已取消公开地图") else sender.sendMessage(
                             "§c取消公开失败，请联系管理员以解决该问题"
                         )
                     }
 
                     STATUS -> {
                         //show the status
-                        sender.sendMessage("§b当前地图已 " + if (mapAgent?.isPublic(sender.world.name) == true) "公开" else "未公开")
+                        sender.sendMessage("§b当前地图已 " + if (mapAgent.isPublic(sender.world.name)) "公开" else "未公开")
                     }
 
                     null -> {}
@@ -587,15 +580,15 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                     sender.sendMessage("§c你没有权限进入此地图")
                     return false
                 }
-                var mvworld = dynamicWorld?.getLoadedWorld(name)
+                var mvworld = dynamicWorld.getLoadedWorld(name)
                 if (mvworld == null) {
-                    val correct = dynamicWorld?.getCorrectUnloadedName(name)
+                    val correct = dynamicWorld.getCorrectUnloadedName(name)
                     if (correct == null) {
                         sender.sendMessage("§c未找到世界" + args[1])
                         return false
                     }
                     sender.sendMessage("§e加载世界中，请稍后...")
-                    if (!dynamicWorld?.loadWorld(correct)!!) {
+                    if (!dynamicWorld.loadWorld(correct)) {
                         sender.sendMessage("§c世界" + correct + "加载失败，请联系管理员以解决该问题")
                         return false
                     }
@@ -609,26 +602,22 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
             }
 
             else -> {
-                sender.sendMessage("§c未知操作，请点击下方链接查阅命令指南以获取帮助")
-                sender.sendMessage(cmdGuide.toString())
+                sender.sendMessage("§c未知操作，请查阅命令指南以获取帮助")
             }
         }
         return true
     }
 
-    private fun noPermission(player: Player?): Boolean {
+    private fun noPermission(player: Player): Boolean {
         if (!hasPermission(player)) {
-            player?.sendMessage("§c你没有权限使用此命令")
+            player.sendMessage("§c你没有权限使用此命令")
             return true
         }
         return false
     }
 
-    private fun hasPermission(player: Player?): Boolean {
-        if (player != null) {
-            return player.hasPermission("mapmanager.admin." + mapAgent!!.getWorldGroupName(player.world.name))
-        }
-        return false
+    private fun hasPermission(player: Player): Boolean {
+        return player.hasPermission("mapmanager.admin." + mapAgent.getWorldGroupName(player.world.name))
     }
 
     private fun notEnough(n: Int): Boolean {

@@ -9,25 +9,37 @@ interface IMapManager {
     /**
      * 获取DynamicWorld实例
      */
-    fun getDynamicWorld(): IDynamicWorld?
+    fun getDynamicWorld(): IDynamicWorld
+
+    /**
+     * 设置DynamicWorld实例
+     */
+    fun setDynamicWorld(dynamicWorld: IDynamicWorld)
 
     /**
      * 获取MapAgent实例
      */
-    fun getMapAgent(): IMapAgent?
+    fun getMapAgent(): IMapAgent
+
+    /**
+     * 设置MapAgent实例
+     */
+    fun setMapAgent(mapAgent: IMapAgent)
 
     /**
      * 获取LuckPerms实例
      */
-    fun getLuckPerms(): LuckPerms?
+    fun getLuckPerms(): LuckPerms
 
     /**
      * 获取MainYaml实例
      */
-    fun getMainYaml(): IMainYaml?
+    fun getMainYaml(): IMainYaml
 
     /**
      * 设置MainYaml实例
      */
     fun setMainYaml(yaml: IMainYaml)
+
+
 }

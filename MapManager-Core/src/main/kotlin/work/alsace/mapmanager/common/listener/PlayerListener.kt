@@ -5,26 +5,28 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import work.alsace.mapmanager.common.function.DynamicWorld
+import work.alsace.mapmanager.MapManager
 
-class PlayerListener(private val dynamicWorld: DynamicWorld?) : Listener {
+class PlayerListener(private val plugin: MapManager) : Listener {
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent?) {
-        event?.player?.world?.name?.let { dynamicWorld?.cancelUnloadTask(it) }
+        event?.player?.world?.name?.let { plugin.getDynamicWorld().cancelUnloadTask(it) }
     }
 
     @EventHandler
     fun onPlayerQuit(event: PlayerQuitEvent?) {
         val player = event?.player
-        if (player?.world?.players?.size!! <= 1) dynamicWorld?.unloadWorldLater(player.world.name)
+        if (player?.world?.players?.size!! <= 1) plugin.getDynamicWorld().unloadWorldLater(player.world.name)
     }
 
     @EventHandler
     fun onPlayerChangeWorld(event: PlayerChangedWorldEvent?) {
         val world = event?.from
-        if (world?.name?.let { dynamicWorld?.isExtraLoad(it) } == true && world?.players?.size!! <= 0) dynamicWorld?.unloadWorldLater(
-            world.name
-        )
-        event?.player?.world?.name?.let { dynamicWorld?.cancelUnloadTask(it) }
+        world?.let {
+            plugin.getDynamicWorld().unloadWorldLater(
+                it.name
+            )
+        }
+        event?.player?.world?.name?.let { plugin.getDynamicWorld().cancelUnloadTask(it) }
     }
 }

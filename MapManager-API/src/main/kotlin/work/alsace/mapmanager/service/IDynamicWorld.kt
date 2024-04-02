@@ -16,7 +16,7 @@ interface IDynamicWorld {
     fun getCorrectUnloadedName(name: String): String?
     fun cancelUnloadTask(name: String)
     fun getWorlds(prefix: String): MutableList<String>
-    fun getOwnerWorlds(player: String): List<String>?
+    fun getOwnerWorlds(player: String): List<String>
     fun getCorrectWorld(name: String): MultiverseWorld?
     fun removeWorld(world: String): Boolean
     fun getPotentialWorlds(): MutableCollection<String?>?

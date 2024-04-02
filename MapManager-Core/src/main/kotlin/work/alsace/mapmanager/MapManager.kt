@@ -17,13 +17,15 @@ import work.alsace.mapmanager.common.function.VersionBridge
 import work.alsace.mapmanager.common.listener.BlockListener
 import work.alsace.mapmanager.common.listener.PlayerListener
 import work.alsace.mapmanager.common.log.Log4JFilter
+import work.alsace.mapmanager.service.IDynamicWorld
+import work.alsace.mapmanager.service.IMapAgent
 import java.io.File
 import java.io.IOException
 import java.util.*
 
 class MapManager : JavaPlugin(), IMapManager {
-    private var dynamicWorld: DynamicWorld? = null
-    private var mapAgent: MapAgent? = null
+    private var dynamicWorld: IDynamicWorld? = null
+    private var mapAgent: IMapAgent? = null
     private var luckPerms: LuckPerms? = null
     private var yaml: IMainYaml? = null
 
@@ -40,12 +42,9 @@ class MapManager : JavaPlugin(), IMapManager {
         logger.info("正在获取LuckPerms API...")
         (LogManager.getRootLogger() as Logger).addFilter(Log4JFilter())
         this.luckPerms = Bukkit.getServicesManager().getRegistration(LuckPerms::class.java)?.provider
-        mapAgent?.setLuckPerms(luckPerms)
         initPermission()
 
         VersionBridge().serverVersionChecks(this)
-        this.dynamicWorld = DynamicWorld(this)
-        this.mapAgent = MapAgent(this)
 
         logger.info("正在注册指令和事件...")
         registerCommand("import", ImportCommand(this))
@@ -55,7 +54,7 @@ class MapManager : JavaPlugin(), IMapManager {
         registerCommand("worldtp", WorldTPCommand(this))
         registerCommand("create", CreateCommand(this))
         server.pluginManager.registerEvents(BlockListener(this), this)
-        server.pluginManager.registerEvents(PlayerListener(dynamicWorld), this)
+        server.pluginManager.registerEvents(PlayerListener(this), this)
         server.consoleSender.sendMessage("[§6MapManager§7] §f加载成功！")
     }
 
@@ -73,20 +72,28 @@ class MapManager : JavaPlugin(), IMapManager {
         Objects.requireNonNull(getCommand(cmd))?.tabCompleter = executor
     }
 
-    override fun getDynamicWorld(): DynamicWorld? {
-        return dynamicWorld
+    override fun getDynamicWorld(): DynamicWorld {
+        return (dynamicWorld as DynamicWorld?)!!
     }
 
-    override fun getMapAgent(): MapAgent? {
-        return mapAgent
+    override fun setDynamicWorld(dynamicWorld: IDynamicWorld) {
+        this.dynamicWorld = dynamicWorld
     }
 
-    override fun getLuckPerms(): LuckPerms? {
-        return luckPerms
+    override fun getMapAgent(): MapAgent {
+        return (mapAgent as MapAgent?)!!
     }
 
-    override fun getMainYaml(): IMainYaml? {
-        return yaml
+    override fun setMapAgent(mapAgent: IMapAgent) {
+        this.mapAgent = mapAgent
+    }
+
+    override fun getLuckPerms(): LuckPerms {
+        return luckPerms!!
+    }
+
+    override fun getMainYaml(): IMainYaml {
+        return yaml!!
     }
 
     override fun setMainYaml(yaml: IMainYaml) {

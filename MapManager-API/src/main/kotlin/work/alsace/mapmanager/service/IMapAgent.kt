@@ -35,4 +35,6 @@ interface IMapAgent {
     fun containsWorld(world: String?): Boolean
     fun getWorlds(): MutableSet<String?>
     fun getUniqueID(player: String): UUID?
+    fun save(): Boolean
+
 }

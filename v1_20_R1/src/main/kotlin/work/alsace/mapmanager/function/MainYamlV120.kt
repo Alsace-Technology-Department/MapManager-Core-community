@@ -36,7 +36,7 @@ class MainYamlV120(plugin: Plugin) : IMainYaml {
         file = File(plugin.dataFolder, "config.yml")
     }
 
-    override fun load(): MainConfig? {
+    override fun load(): MainConfig {
         if (!file?.exists()!!) {
             try {
                 file.createNewFile()
@@ -49,14 +49,14 @@ class MainYamlV120(plugin: Plugin) : IMainYaml {
             return tmp
         }
         try {
-            FileReader(file).use { reader -> return yaml?.loadAs(reader, MainConfig::class.java) }
+            FileReader(file).use { reader -> return yaml?.loadAs(reader, MainConfig::class.java)!! }
         } catch (e: IOException) {
             e.printStackTrace()
             return MainConfig()
         }
     }
 
-    override fun save(config: MainConfig?) {
+    override fun save(config: MainConfig) {
         try {
             file?.let { FileWriter(it).use { writer -> yaml?.dump(config, writer) } }
         } catch (e: IOException) {

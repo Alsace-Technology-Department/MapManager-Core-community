@@ -78,11 +78,12 @@ class CreateCommand(private val plugin: MapManager?) : TabExecutor {
         }
         if (alias == null) alias = name
         if (group == null) group = name
-        if (!generate?.let { plugin?.getDynamicWorld()?.createWorld(name, alias, color, it) }!!) {
+        if (generate == null) generate = "flat"
+        if (!plugin!!.getDynamicWorld()!!.createWorld(name, alias, color, generate)) {
             sender.sendMessage("§c地图创建失败，请查看控制台以获取更多信息")
             return true
         }
-        plugin?.getMapAgent()?.newWorld(name, owner, group)
+        plugin.getMapAgent()?.newWorld(name, owner, group)
         sender.sendMessage("§a已创建并初始化地图")
         return true
     }

@@ -9,6 +9,7 @@ import net.querz.nbt.tag.CompoundTag
 import work.alsace.mapmanager.MapManager
 import java.io.File
 import java.io.IOException
+import kotlin.math.max
 
 
 class VersionCheck(private val plugin: MapManager) {
@@ -92,21 +93,22 @@ class VersionCheck(private val plugin: MapManager) {
 
     private fun isRegionFileVersionCompatible(regionFile: File): Boolean {
         try {
+            var maxDataVersion = 0
             val mcaFile = MCAUtil.read(regionFile)
             for (x in 0..31) {
                 for (z in 0..31) {
                     if (mcaFile.getChunk(x, z) != null) {
                         val chunk: Chunk = mcaFile.getChunk(x, z)
-                        return chunk.dataVersion <= serverVersion
+                        if(chunk.dataVersion > maxDataVersion) maxDataVersion = chunk.dataVersion
                     }
                 }
             }
+            return maxDataVersion <= serverVersion
         } catch (e: IOException) {
             plugin.logger.warning("读取区块文件" + regionFile.name + "时发生错误")
             e.printStackTrace()
             return false
         }
-        return false
     }
 
     private val serverVersion: Int

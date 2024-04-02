@@ -172,11 +172,11 @@ class DynamicWorld(private val plugin: MapManager?) : IDynamicWorld {
      * @param player 玩家名称。
      * @return 玩家管理的所有世界名称列表。
      */
-    override fun getOwnerWorlds(player: String): List<String>? {
+    override fun getOwnerWorlds(player: String): List<String> {
         val luckPerms = plugin!!.getLuckPerms()
-        val playerUuid = plugin.getMapAgent()!!.getUniqueID(player)
+        val playerUuid = plugin.getMapAgent().getUniqueID(player)
         plugin.logger.info(playerUuid.toString())
-        val userFuture = luckPerms!!.userManager.loadUser(playerUuid!!)
+        val userFuture = luckPerms.userManager.loadUser(playerUuid!!)
         val user = userFuture.join() ?: return emptyList()
         plugin.logger.info(user.username)
         return getWorlds("").stream()
@@ -351,7 +351,6 @@ class DynamicWorld(private val plugin: MapManager?) : IDynamicWorld {
                 ) return false
             }
         }
-        if (!mv.addWorld(name, World.Environment.NORMAL, null, WorldType.FLAT, false, null)) return false
         val world = getMVWorld(name)
         if (world == null) {
             plugin?.logger?.warning("§c获取" + name + "信息失败")
