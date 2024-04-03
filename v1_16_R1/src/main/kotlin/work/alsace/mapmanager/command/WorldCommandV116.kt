@@ -1,5 +1,8 @@
 package work.alsace.mapmanager.command
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
@@ -28,6 +31,15 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
     private var sender: CommandSender? = null
     private val dynamicWorld: IDynamicWorld = plugin.getDynamicWorld()
     private val mapAgent: IMapAgent = plugin.getMapAgent()
+    private val cmdGuide: Component = Component.text("命令指南：", NamedTextColor.DARK_AQUA)
+        .append(
+            Component.text(
+                "https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-DBtWdNaH9oS1FJxCBNrcSsbAnjf",
+                NamedTextColor.AQUA,
+                TextDecoration.UNDERLINED
+            )
+                .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-DBtWdNaH9oS1FJxCBNrcSsbAnjf"))
+        )
     private val subCommand1: MutableList<String?> = mutableListOf(
         "admin",
         "admins",
@@ -260,7 +272,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                             sender.world.name,
                             MapGroup.BUILDER,
                             args[2]
-                        ) == true
+                        )
                     ) {
                         sender.sendMessage("§a已将玩家" + args[2] + "设置为该地图的建筑人员")
                     } else {
@@ -273,7 +285,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
                             sender.world.name,
                             1,
                             args[2]
-                        ) == true
+                        )
                     ) {
                         sender.sendMessage("§a已取消玩家" + args[2] + "在该地图内的建筑资格")
                     } else {
@@ -603,6 +615,7 @@ class WorldCommandV116(plugin: IMapManager) : TabExecutor {
 
             else -> {
                 sender.sendMessage("§c未知操作，请查阅命令指南以获取帮助")
+                sender.sendMessage(cmdGuide)
             }
         }
         return true

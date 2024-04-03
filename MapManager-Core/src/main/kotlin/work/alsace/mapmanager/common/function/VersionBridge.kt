@@ -18,35 +18,35 @@ class VersionBridge {
                 .toTypedArray()[3]
         plugin.logger.info("Server version: $version")
         when (version) {
-            "v1_16_R1" -> {
+            "v1_16_R1", "v1_16_R2", "v1_16_R3" -> {
                 plugin.setMainYaml(MainYamlV116(plugin))
                 plugin.setDynamicWorld(DynamicWorld(plugin))
                 plugin.setMapAgent(MapAgent(plugin))
                 plugin.registerCommand("world", WorldCommandV116(plugin))
             }
 
-            "v1_17_R1" -> {
+            "v1_17_R1", "v1_17_R2", "v1_17_R3"  -> {
                 plugin.setMainYaml(MainYamlV116(plugin))
                 plugin.setDynamicWorld(DynamicWorld(plugin))
                 plugin.setMapAgent(MapAgent(plugin))
                 plugin.registerCommand("world", WorldCommandV116(plugin))
             }
 
-            "v1_18_R1" -> {
+            "v1_18_R1", "v1_18_R2", "v1_18_R3" -> {
                 plugin.setMainYaml(MainYamlV116(plugin))
                 plugin.setDynamicWorld(DynamicWorld(plugin))
                 plugin.setMapAgent(MapAgent(plugin))
                 plugin.registerCommand("world", WorldCommandV116(plugin))
             }
 
-            "v1_19_R1" -> {
+            "v1_19_R1", "v1_19_R2", "v1_19_R3" -> {
                 plugin.setMainYaml(MainYamlV116(plugin))
                 plugin.setDynamicWorld(DynamicWorld(plugin))
                 plugin.setMapAgent(MapAgent(plugin))
                 plugin.registerCommand("world", WorldCommandV116(plugin))
             }
 
-            "v1_20_R1" -> {
+            "v1_20_R1", "v1_20_R2", "v1_20_R3" -> {
                 plugin.setMainYaml(MainYamlV120(plugin))
                 plugin.setDynamicWorld(DynamicWorld(plugin))
                 plugin.setMapAgent(MapAgent(plugin))
