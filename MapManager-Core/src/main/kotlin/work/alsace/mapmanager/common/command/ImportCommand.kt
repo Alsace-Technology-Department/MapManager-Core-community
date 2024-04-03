@@ -72,7 +72,7 @@ class ImportCommand(private val plugin: MapManager?) : TabExecutor {
             return true
         }
         sender.sendMessage("§a已导入地图")
-        plugin.getMapAgent()?.newWorld(name, owner, group)
+        plugin.getMapAgent().newWorld(name, owner, group)
         return true
     }
 }

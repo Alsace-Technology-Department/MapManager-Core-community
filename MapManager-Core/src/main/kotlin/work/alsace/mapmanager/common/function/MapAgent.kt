@@ -19,8 +19,8 @@ import work.alsace.mapmanager.MapManager
 import work.alsace.mapmanager.pojo.MainConfig
 import work.alsace.mapmanager.pojo.WorldGroup
 import work.alsace.mapmanager.pojo.WorldNode
-import work.alsace.mapmanager.service.IMapAgent
 import work.alsace.mapmanager.service.IMainYaml
+import work.alsace.mapmanager.service.IMapAgent
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -32,7 +32,7 @@ import java.util.stream.Collectors
 /**
  * 地图管理代理，负责处理与LuckPerms权限插件的交互、管理世界及其权限组等功能。
  */
-open class MapAgent(private val plugin: MapManager) : IMapAgent {
+class MapAgent(private val plugin: MapManager) : IMapAgent {
     private val nodeIO: FileIO<WorldNode?>?
     private val groupIO: FileIO<WorldGroup?>?
     private val yaml: IMainYaml
@@ -70,6 +70,7 @@ open class MapAgent(private val plugin: MapManager) : IMapAgent {
         groupMap = groupIO?.load()
         if (groupMap == null) groupMap = ConcurrentHashMap()
     }
+
 
     override fun save(): Boolean {
         return nodeIO!!.save(nodeMap) && groupIO!!.save(groupMap)
@@ -182,7 +183,7 @@ open class MapAgent(private val plugin: MapManager) : IMapAgent {
     }
 
     /**
-     * 从LuckPerms权限管理中删除一个世界及其相关的权限信息。
+     * 删除一个世界及其相关的权限信息。
      *
      * @param world 要删除的世界名称。
      * @return 如果成功删除，返回true；否则返回false。
@@ -507,6 +508,24 @@ open class MapAgent(private val plugin: MapManager) : IMapAgent {
     }
 
     /**
+     * 获取玩家可以进入的所有世界
+     * @param name 玩家名
+     * @return 玩家可进入的所有世界
+     */
+    override fun getAccessWorlds(name: String?): List<String?>? {
+        return dynamicWorld.getWorlds("").stream()
+            .filter { world ->
+                Objects.requireNonNull(
+                    Bukkit.getServer().getPlayer(
+                        name!!
+                    )
+                )
+                    ?.hasPermission("multiverse.access.$world") == true
+            }
+            .collect(Collectors.toList())
+    }
+
+    /**
      * 与LuckPerms插件同步数据，更新本地存储的玩家权限信息。
      *
      * @param sender 命令发送者，用于回显操作结果。
@@ -640,6 +659,16 @@ open class MapAgent(private val plugin: MapManager) : IMapAgent {
      */
     override fun getWorldGroupName(world: String?): String? {
         return nodeMap?.getOrDefault(world, nullWorldNode)?.getGroup()
+    }
+
+    /**
+     * 获取权限组所包含的世界。
+     *
+     * @param group 权限组名称。
+     * @return 世界列表，若权限组下无世界，则返回null。
+     */
+    override fun getWorldListByGroup(group: String?): List<String?>? {
+        return groupMap!!.getOrDefault(group, nullWorldGroup)!!.getWorlds()!!.stream().toList()
     }
 
     /**
