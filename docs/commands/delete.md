@@ -6,15 +6,12 @@
 
 删除当前所在的世界（需要玩家执行）：
 
-```
-/delete [world]
-```
+`/delete [world]`
+
 
 确认删除操作：
 
-```
-/delete confirm
-```
+`/delete confirm`
 
 ### 参数说明
 
