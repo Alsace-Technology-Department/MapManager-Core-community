@@ -14,7 +14,7 @@ class WriteCommand(private val plugin: MapManager?) : CommandExecutor {
         sender.sendMessage("Node Map:" + plugin?.getMapAgent()!!.getNodeMap())
         sender.sendMessage("")
         sender.sendMessage("")
-        sender.sendMessage("Group Map:" + plugin.getMapAgent()!!.getGroupMap())
+        sender.sendMessage("Group Map:" + plugin.getMapAgent().getGroupMap())
         return true
     }
 }
