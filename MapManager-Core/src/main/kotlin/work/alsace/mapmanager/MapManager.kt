@@ -123,38 +123,32 @@ class MapManager : JavaPlugin(), IMapManager {
 
     private fun initPermission() {
         val manager = luckPerms?.groupManager
-        manager?.loadGroup("apply")?.thenAcceptAsync {
-            if (it == null) {
-                manager.createAndLoadGroup("apply").thenAcceptAsync { lp: Group? ->
-                    val data = lp?.data()
-                    data?.add(InheritanceNode.builder("default").build())
-                    if (lp != null) {
-                        manager.saveGroup(lp)
-                        logger.info("权限组" + lp.name + "已创建并初始化完毕")
-                    }
-                }
-            }
+        if (manager == null) {
+            logger.warning("加载LuckPerms出现问题，请联系开发者")
+            return
         }
-        manager?.loadGroup("public")?.thenAcceptAsync {
-            if (it == null) {
-                manager.createAndLoadGroup("public").thenAcceptAsync { lp: Group? ->
-                    if (lp != null) {
-                        manager.saveGroup(lp)
-                        logger.info("权限组" + lp.name + "已创建并初始化完毕")
+        val groups = listOf("apply", "public", "worldbase")
+        groups.forEach { groupName ->
+            manager.loadGroup(groupName).thenAcceptAsync { optionalGroup: Optional<Group> ->
+                if (!optionalGroup.isPresent) {
+                    manager.createAndLoadGroup(groupName).thenAccept { newGroup: Group? ->
+                        if (newGroup != null) {
+                            val data = newGroup.data()
+                            data.add(InheritanceNode.builder("default").build())
+                            manager.saveGroup(newGroup).thenRun {
+                                logger.info("权限组 ${newGroup.name} 已创建并初始化完毕")
+                            }
+                        } else {
+                            logger.warning("无法创建权限组 $groupName")
+                        }
                     }
+                } else {
+                    // 权限组已存在
+                    logger.info("权限组 $groupName 已存在，无需创建")
                 }
-            }
-        }
-        manager?.loadGroup("worldbase")?.thenAcceptAsync {
-            if (it == null) {
-                manager.createAndLoadGroup("worldbase").thenAcceptAsync { lp: Group? ->
-                    val data = lp?.data()
-                    data?.add(InheritanceNode.builder("default").build())
-                    if (lp != null) {
-                        manager.saveGroup(lp)
-                        logger.info("权限组" + lp.name + "已创建并初始化完毕")
-                    }
-                }
+            }.exceptionally { throwable ->
+                logger.warning("加载权限组 $groupName 时出错: ${throwable.message}")
+                null
             }
         }
     }
