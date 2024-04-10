@@ -44,6 +44,11 @@ class VersionCheck(private val plugin: MapManager) {
                 && isLevelFileVersionCorrect(dir)
     }
 
+    /**
+     * 检测地图文件版本是否合法
+     * @param dir File 地图文件夹
+     * @return true为合法，false不合法
+     */
     private fun isLevelFileVersionCorrect(file: File): Boolean {
         try {
             val levelDatFile = File("$file/level.dat")
@@ -69,6 +74,11 @@ class VersionCheck(private val plugin: MapManager) {
         return false
     }
 
+    /**
+     * 检测区块文件版本是否兼容
+     * @param worldDirectory File 地图文件夹
+     * @return true为兼容，false不兼容
+     */
     private fun areRegionFilesVersionCorrect(worldDirectory: File): Boolean {
         val regionDir = File(worldDirectory, "region")
         if (!regionDir.exists() || !regionDir.isDirectory) {
@@ -91,6 +101,11 @@ class VersionCheck(private val plugin: MapManager) {
         return true
     }
 
+    /**
+     * 检测区块文件版本是否兼容
+     * @param regionFile File 区块文件
+     * @return true为兼容，false不兼容
+     */
     private fun isRegionFileVersionCompatible(regionFile: File): Boolean {
         try {
             var maxDataVersion = 0
@@ -111,6 +126,10 @@ class VersionCheck(private val plugin: MapManager) {
         }
     }
 
+    /**
+     * 获取服务器版本
+     * @return 服务器版本
+     */
     private val serverVersion: Int
         get() = plugin.server.unsafe.dataVersion
 }

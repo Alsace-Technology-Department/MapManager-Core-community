@@ -22,11 +22,17 @@ class BlockListener(plugin: MapManager?) : Listener {
         mapAgent = plugin?.getMapAgent()
     }
 
+    /**
+     * 检测物理效果
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     fun onBlockPhysics(event: BlockPhysicsEvent?) {
         if (!mapAgent?.isPhysical(event?.block?.world?.name)!!) event?.isCancelled = true
     }
 
+    /**
+     * 检测物理效果
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     fun onFallingBlock(event: EntitySpawnEvent?) {
         if (mapAgent?.isPhysical(event?.location?.world?.name) == true) return
@@ -35,16 +41,25 @@ class BlockListener(plugin: MapManager?) : Listener {
         event.location.block.setType((event.entity as FallingBlock).blockData.material, false)
     }
 
+    /**
+     * 检测爆炸效果
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     fun onBlockExplode(event: BlockExplodeEvent?) {
         if (!mapAgent?.isExploded(event?.block?.world?.name)!!) event?.isCancelled = true
     }
 
+    /**
+     * 检测爆炸效果
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     fun onEntityExplode(event: EntityExplodeEvent?) {
         if (!mapAgent?.isExploded(event?.entity?.world?.name)!!) event?.isCancelled = true
     }
 
+    /**
+     * 检测龙蛋
+     */
     @EventHandler
     fun onDragonEggTeleport(event: PlayerInteractEvent?) {
         if (event?.action != Action.RIGHT_CLICK_BLOCK) return
