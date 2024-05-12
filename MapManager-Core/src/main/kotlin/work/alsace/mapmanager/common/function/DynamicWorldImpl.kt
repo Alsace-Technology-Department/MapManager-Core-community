@@ -7,8 +7,8 @@ import net.luckperms.api.node.NodeType
 import net.luckperms.api.node.types.PermissionNode
 import org.bukkit.*
 import org.bukkit.scheduler.BukkitRunnable
-import work.alsace.mapmanager.MapManager
-import work.alsace.mapmanager.service.IDynamicWorld
+import work.alsace.mapmanager.MapManagerImpl
+import work.alsace.mapmanager.service.DynamicWorld
 import java.io.File
 import java.util.*
 import java.util.stream.Collectors
@@ -16,7 +16,7 @@ import java.util.stream.Collectors
 /**
  * 动态世界管理器，提供世界的加载、卸载和管理功能。
  */
-class DynamicWorld(private val plugin: MapManager?) : IDynamicWorld {
+class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
     private val mv =
         (Bukkit.getServer().pluginManager.getPlugin("Multiverse-Core") as MultiverseCore?)?.mvWorldManager
     private val tasks: MutableMap<String?, BukkitRunnable?> = HashMap()

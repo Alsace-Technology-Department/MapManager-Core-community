@@ -12,10 +12,10 @@ import org.bukkit.event.block.BlockPhysicsEvent
 import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import work.alsace.mapmanager.MapManager
-import work.alsace.mapmanager.common.function.MapAgent
+import work.alsace.mapmanager.MapManagerImpl
+import work.alsace.mapmanager.service.MapAgent
 
-class BlockListener(plugin: MapManager?) : Listener {
+class BlockListener(plugin: MapManagerImpl?) : Listener {
     private val mapAgent: MapAgent?
 
     init {

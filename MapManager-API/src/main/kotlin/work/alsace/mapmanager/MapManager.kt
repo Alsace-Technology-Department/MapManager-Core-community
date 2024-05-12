@@ -1,33 +1,33 @@
 package work.alsace.mapmanager
 
 import net.luckperms.api.LuckPerms
-import work.alsace.mapmanager.service.IDynamicWorld
-import work.alsace.mapmanager.service.IMainYaml
-import work.alsace.mapmanager.service.IMapAgent
+import work.alsace.mapmanager.service.DynamicWorld
+import work.alsace.mapmanager.service.MainYaml
+import work.alsace.mapmanager.service.MapAgent
 
-interface IMapManager {
+interface MapManager {
     /**
      * 获取DynamicWorld实例
      */
-    fun getDynamicWorld(): IDynamicWorld
+    fun getDynamicWorld(): DynamicWorld
 
     /**
      * 设置DynamicWorld实例
      * @param dynamicWorld DynamicWorld实例
      */
-    fun setDynamicWorld(dynamicWorld: IDynamicWorld)
+    fun setDynamicWorld(dynamicWorld: DynamicWorld)
 
     /**
      * 获取MapAgent实例
      * @return MapAgent实例
      */
-    fun getMapAgent(): IMapAgent
+    fun getMapAgent(): MapAgent
 
     /**
      * 设置MapAgent实例
      * @param mapAgent MapAgent实例
      */
-    fun setMapAgent(mapAgent: IMapAgent)
+    fun setMapAgent(mapAgent: MapAgent)
 
     /**
      * 获取LuckPerms实例
@@ -39,13 +39,18 @@ interface IMapManager {
      * 获取MainYaml实例
      * @return MainYaml实例
      */
-    fun getMainYaml(): IMainYaml
+    fun getMainYaml(): MainYaml
 
     /**
      * 设置MainYaml实例
      * @param yaml MainYaml实例
      */
-    fun setMainYaml(yaml: IMainYaml)
+    fun setMainYaml(yaml: MainYaml)
 
 
+    /**
+     * 获取MapManager实例
+     * @return MapManager实例
+     */
+    fun getInstance(): MapManager?
 }

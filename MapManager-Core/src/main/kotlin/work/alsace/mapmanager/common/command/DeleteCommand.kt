@@ -4,11 +4,11 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
-import work.alsace.mapmanager.MapManager
-import work.alsace.mapmanager.common.function.DynamicWorld
-import work.alsace.mapmanager.common.function.MapAgent
+import work.alsace.mapmanager.MapManagerImpl
+import work.alsace.mapmanager.service.DynamicWorld
+import work.alsace.mapmanager.service.MapAgent
 
-class DeleteCommand(plugin: MapManager?) : TabExecutor {
+class DeleteCommand(plugin: MapManagerImpl?) : TabExecutor {
     private val lastTime: MutableMap<String?, DeletionNode?> = HashMap()
     private val world: DynamicWorld?
     private val map: MapAgent?

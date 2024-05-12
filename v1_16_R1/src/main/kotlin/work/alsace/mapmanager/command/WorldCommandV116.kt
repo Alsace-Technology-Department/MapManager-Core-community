@@ -14,11 +14,11 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
-import work.alsace.mapmanager.IMapManager
+import work.alsace.mapmanager.MapManager
 import work.alsace.mapmanager.command.WorldCommandV116.Operation.*
-import work.alsace.mapmanager.service.IDynamicWorld
-import work.alsace.mapmanager.service.IMapAgent
-import work.alsace.mapmanager.service.IMapAgent.MapGroup
+import work.alsace.mapmanager.service.DynamicWorld
+import work.alsace.mapmanager.service.MapAgent
+import work.alsace.mapmanager.service.MapAgent.MapGroup
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutionException
@@ -26,11 +26,11 @@ import java.util.regex.Pattern
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-class WorldCommandV116(plugin: IMapManager) : TabExecutor {
+class WorldCommandV116(plugin: MapManager) : TabExecutor {
     private var args: Array<String>? = null
     private var sender: CommandSender? = null
-    private val dynamicWorld: IDynamicWorld = plugin.getDynamicWorld()
-    private val mapAgent: IMapAgent = plugin.getMapAgent()
+    private val dynamicWorld: DynamicWorld = plugin.getDynamicWorld()
+    private val mapAgent: MapAgent = plugin.getMapAgent()
     private val cmdGuide: Component = Component.text("命令指南：", NamedTextColor.DARK_AQUA)
         .append(
             Component.text(

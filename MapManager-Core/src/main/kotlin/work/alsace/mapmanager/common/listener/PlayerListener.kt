@@ -5,9 +5,9 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import work.alsace.mapmanager.MapManager
+import work.alsace.mapmanager.MapManagerImpl
 
-class PlayerListener(private val plugin: MapManager) : Listener {
+class PlayerListener(private val plugin: MapManagerImpl) : Listener {
     /**
      * 玩家进入游戏时，取消卸载世界任务。
      * @param event 玩家进入游戏事件。

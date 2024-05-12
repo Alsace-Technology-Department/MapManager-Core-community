@@ -3,13 +3,13 @@ package work.alsace.mapmanager.common.command
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
-import work.alsace.mapmanager.MapManager
+import work.alsace.mapmanager.MapManagerImpl
 import work.alsace.mapmanager.common.command.MapAdminCommand.Operation.*
-import work.alsace.mapmanager.common.function.MapAgent
+import work.alsace.mapmanager.service.MapAgent
 import java.util.*
 import java.util.stream.Collectors
 
-class MapAdminCommand(plugin: MapManager?) : TabExecutor {
+class MapAdminCommand(plugin: MapManagerImpl?) : TabExecutor {
     private val mapAgent: MapAgent? = plugin?.getMapAgent()
     private val subCommand: MutableList<String?> =
         mutableListOf("reload", "physics", "explosion", "sync", "save")

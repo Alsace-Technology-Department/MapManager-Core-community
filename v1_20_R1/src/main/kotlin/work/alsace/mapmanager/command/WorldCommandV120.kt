@@ -13,9 +13,9 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
-import work.alsace.mapmanager.IMapManager
-import work.alsace.mapmanager.service.IDynamicWorld
-import work.alsace.mapmanager.service.IMapAgent
+import work.alsace.mapmanager.MapManager
+import work.alsace.mapmanager.service.DynamicWorld
+import work.alsace.mapmanager.service.MapAgent
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutionException
@@ -23,11 +23,11 @@ import java.util.regex.Pattern
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-class WorldCommandV120(plugin: IMapManager) : TabExecutor {
+class WorldCommandV120(plugin: MapManager) : TabExecutor {
     private var args: Array<String>? = null
     private var sender: CommandSender? = null
-    private val dynamicWorld: IDynamicWorld = plugin.getDynamicWorld()
-    private val mapAgent: IMapAgent = plugin.getMapAgent()
+    private val dynamicWorld: DynamicWorld = plugin.getDynamicWorld()
+    private val mapAgent: MapAgent = plugin.getMapAgent()
     private val subCommand1: MutableList<String?> = mutableListOf(
         "admin",
         "admins",
@@ -202,7 +202,7 @@ class WorldCommandV120(plugin: IMapManager) : TabExecutor {
                 if (args[1].equals("add", ignoreCase = true)) {
                     if (mapAgent.addPlayer(
                             sender.world.name,
-                            IMapAgent.MapGroup.ADMIN,
+                            MapAgent.MapGroup.ADMIN,
                             args[2]
                         )
                     ) sender.sendMessage("§a已将玩家" + args[2] + "设置为该地图的管理员") else sender.sendMessage(
@@ -228,7 +228,7 @@ class WorldCommandV120(plugin: IMapManager) : TabExecutor {
 
             "admins" -> {
                 val admins: MutableSet<String?>? = try {
-                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name), IMapAgent.MapGroup.ADMIN)?.get()
+                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name), MapAgent.MapGroup.ADMIN)?.get()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                     sender.sendMessage("§c管理员列表查询失败，请联系管理员以解决该问题")
@@ -263,7 +263,7 @@ class WorldCommandV120(plugin: IMapManager) : TabExecutor {
                 if (args[1].equals("add", ignoreCase = true)) {
                     if (mapAgent.addPlayer(
                             sender.world.name,
-                            IMapAgent.MapGroup.BUILDER,
+                            MapAgent.MapGroup.BUILDER,
                             args[2]
                         )
                     ) {
@@ -297,7 +297,7 @@ class WorldCommandV120(plugin: IMapManager) : TabExecutor {
                     return false
                 }
                 val builders: MutableSet<String?>? = try {
-                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name), IMapAgent.MapGroup.BUILDER)
+                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name), MapAgent.MapGroup.BUILDER)
                         ?.get()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
@@ -333,7 +333,7 @@ class WorldCommandV120(plugin: IMapManager) : TabExecutor {
                 if (args[1].equals("add", ignoreCase = true)) {
                     if (mapAgent.addPlayer(
                             sender.world.name,
-                            IMapAgent.MapGroup.VISITOR,
+                            MapAgent.MapGroup.VISITOR,
                             args[2]
                         )
                     ) sender.sendMessage("§a玩家" + args[2] + "现在可以来参观你的地图了") else {
@@ -364,7 +364,7 @@ class WorldCommandV120(plugin: IMapManager) : TabExecutor {
                     return false
                 }
                 val visitors: MutableSet<String?>? = try {
-                    mapAgent.getPlayers(sender.world.name, IMapAgent.MapGroup.VISITOR)?.get()
+                    mapAgent.getPlayers(sender.world.name, MapAgent.MapGroup.VISITOR)?.get()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                     sender.sendMessage("§c参观人员列表查询失败，请联系管理员以解决该问题")

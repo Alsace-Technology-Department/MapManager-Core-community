@@ -4,11 +4,11 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
-import work.alsace.mapmanager.MapManager
+import work.alsace.mapmanager.MapManagerImpl
 import java.util.*
 import java.util.stream.Collectors
 
-class CreateCommand(private val plugin: MapManager?) : TabExecutor {
+class CreateCommand(private val plugin: MapManagerImpl?) : TabExecutor {
     private val emptyList: MutableList<String?> = ArrayList(0)
     override fun onTabComplete(
         sender: CommandSender,

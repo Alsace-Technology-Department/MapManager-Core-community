@@ -15,12 +15,13 @@ import org.bukkit.ChatColor
 import org.bukkit.OfflinePlayer
 import org.bukkit.World
 import org.bukkit.command.CommandSender
-import work.alsace.mapmanager.MapManager
+import work.alsace.mapmanager.MapManagerImpl
 import work.alsace.mapmanager.pojo.MainConfig
 import work.alsace.mapmanager.pojo.WorldGroup
 import work.alsace.mapmanager.pojo.WorldNode
-import work.alsace.mapmanager.service.IMainYaml
-import work.alsace.mapmanager.service.IMapAgent
+import work.alsace.mapmanager.service.DynamicWorld
+import work.alsace.mapmanager.service.MainYaml
+import work.alsace.mapmanager.service.MapAgent
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -32,10 +33,10 @@ import java.util.stream.Collectors
 /**
  * 地图管理代理，负责处理与LuckPerms权限插件的交互、管理世界及其权限组等功能。
  */
-class MapAgent(private val plugin: MapManager) : IMapAgent {
+class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
     private val nodeIO: FileIO<WorldNode?>?
     private val groupIO: FileIO<WorldGroup?>?
-    private val yaml: IMainYaml
+    private val yaml: MainYaml
     private var luckPerms: LuckPerms = plugin.getLuckPerms()
     private val dynamicWorld: DynamicWorld = plugin.getDynamicWorld()
     private var nodeMap //world name -> world node
@@ -62,7 +63,7 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
         }
     }
 
-    fun reload() {
+    override fun reload() {
         nodeMap?.clear()
         nodeMap = nodeIO?.load()
         if (nodeMap == null) nodeMap = ConcurrentHashMap()
@@ -76,7 +77,7 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
         return nodeIO!!.save(nodeMap) && groupIO!!.save(groupMap)
     }
 
-    fun setLuckPerms(luckPerms: LuckPerms) {
+    override fun setLuckPerms(luckPerms: LuckPerms) {
         this.luckPerms = luckPerms
     }
 
@@ -267,7 +268,7 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
      * @param player 玩家名称。
      * @return 操作成功返回true，否则返回false。
      */
-    override fun addPlayer(world: String?, group: IMapAgent.MapGroup?, player: String?): Boolean {
+    override fun addPlayer(world: String?, group: MapAgent.MapGroup?, player: String?): Boolean {
         val worldGroup = getWorldGroupName(world)
         if (world == "__nil") {
             plugin.logger.warning("§c无法找到" + world + "对应的权限组")
@@ -302,7 +303,7 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
             return false
         }
         when (group) {
-            IMapAgent.MapGroup.ADMIN -> {
+            MapAgent.MapGroup.ADMIN -> {
                 run {
                     user?.data()?.add(PermissionNode.builder("mapmanager.admin.$worldGroup").build())
                     addAdmin(world, name)
@@ -313,12 +314,12 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
                 }
             }
 
-            IMapAgent.MapGroup.BUILDER -> {
+            MapAgent.MapGroup.BUILDER -> {
                 worldGroup?.let { InheritanceNode.builder(it).build() }?.let { user?.data()?.add(it) }
                 addBuilder(world, name)
             }
 
-            IMapAgent.MapGroup.VISITOR -> {
+            MapAgent.MapGroup.VISITOR -> {
                 if (world != null) {
                     user?.data()?.add(
                         PermissionNode.builder("multiverse.access." + world.lowercase(Locale.getDefault())).build()
@@ -462,13 +463,13 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
      * @param group 权限组枚举（管理员、建筑师、访客）。
      * @return 包含玩家名称的CompletableFuture实例。
      */
-    override fun getPlayers(name: String?, group: IMapAgent.MapGroup?): CompletableFuture<MutableSet<String?>?>? {
+    override fun getPlayers(name: String?, group: MapAgent.MapGroup?): CompletableFuture<MutableSet<String?>?>? {
         val matcher = when (group) {
-            IMapAgent.MapGroup.ADMIN -> NodeMatcher.key<Node?>(
+            MapAgent.MapGroup.ADMIN -> NodeMatcher.key<Node?>(
                 PermissionNode.builder("mapmanager.admin." + (name?.lowercase(Locale.getDefault()))).build()
             )
 
-            IMapAgent.MapGroup.BUILDER -> name?.let {
+            MapAgent.MapGroup.BUILDER -> name?.let {
                 InheritanceNode.builder(it.lowercase(Locale.getDefault())).build()
             }?.let {
                 NodeMatcher.key<Node?>(
@@ -476,7 +477,7 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
                 )
             }
 
-            IMapAgent.MapGroup.VISITOR -> NodeMatcher.key<Node?>(
+            MapAgent.MapGroup.VISITOR -> NodeMatcher.key<Node?>(
                 PermissionNode.builder(
                     "multiverse.access." + (name?.lowercase(
                         Locale.getDefault()
@@ -530,7 +531,7 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
      *
      * @param sender 命令发送者，用于回显操作结果。
      */
-    fun syncWithLuckPerms(sender: CommandSender?) {
+    override fun syncWithLuckPerms(sender: CommandSender?) {
         val nodeMapBackup = ConcurrentHashMap(nodeMap)
         val groupMapBackup = ConcurrentHashMap(groupMap)
 
@@ -542,7 +543,7 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
 
         plugin.logger.info("§e开始同步参观人员数据")
         nodeMap?.keys?.forEach { worldName ->
-            val visitorTask = getPlayers(worldName, IMapAgent.MapGroup.VISITOR)?.thenAccept { players ->
+            val visitorTask = getPlayers(worldName, MapAgent.MapGroup.VISITOR)?.thenAccept { players ->
                 nodeMap?.get(worldName)?.setVisitors(players)
             }
             visitorTask?.let { tasks.add(it) }
@@ -550,12 +551,12 @@ class MapAgent(private val plugin: MapManager) : IMapAgent {
 
         plugin.logger.info("§e开始同步管理员和建筑人员数据")
         groupMap?.keys?.forEach { worldName ->
-            val adminTask = getPlayers(worldName, IMapAgent.MapGroup.ADMIN)?.thenAccept { players ->
+            val adminTask = getPlayers(worldName, MapAgent.MapGroup.ADMIN)?.thenAccept { players ->
                 groupMap?.get(worldName)?.setAdmins(players)
             }
             adminTask?.let { tasks.add(it) }
 
-            val builderTask = getPlayers(worldName, IMapAgent.MapGroup.BUILDER)?.thenAccept { players ->
+            val builderTask = getPlayers(worldName, MapAgent.MapGroup.BUILDER)?.thenAccept { players ->
                 groupMap!![worldName]?.setBuilders(players)
             }
             builderTask?.let { tasks.add(it) }

@@ -6,13 +6,12 @@ import net.querz.mca.MCAUtil
 import net.querz.nbt.io.NBTUtil
 import net.querz.nbt.io.NamedTag
 import net.querz.nbt.tag.CompoundTag
-import work.alsace.mapmanager.MapManager
+import work.alsace.mapmanager.MapManagerImpl
 import java.io.File
 import java.io.IOException
-import kotlin.math.max
 
 
-class VersionCheck(private val plugin: MapManager) {
+class VersionCheck(private val plugin: MapManagerImpl) {
     /**
      * 检测主目录下地图文件版本是否合法
      * @param world String 地图名

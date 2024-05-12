@@ -4,11 +4,11 @@ import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
-import work.alsace.mapmanager.MapManager
-import work.alsace.mapmanager.common.function.DynamicWorld
+import work.alsace.mapmanager.MapManagerImpl
+import work.alsace.mapmanager.service.DynamicWorld
 import java.util.stream.Collectors
 
-class WorldTPCommand(plugin: MapManager) : TabExecutor {
+class WorldTPCommand(plugin: MapManagerImpl) : TabExecutor {
     private var dynamicWorld: DynamicWorld? = null
 
     init {

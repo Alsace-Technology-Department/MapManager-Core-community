@@ -10,13 +10,13 @@ import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor
 import org.yaml.snakeyaml.nodes.Tag
 import org.yaml.snakeyaml.representer.Representer
 import work.alsace.mapmanager.pojo.MainConfig
-import work.alsace.mapmanager.service.IMainYaml
+import work.alsace.mapmanager.service.MainYaml
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
 
-class MainYamlV120(plugin: Plugin) : IMainYaml {
+class MainYamlV120(plugin: Plugin) : MainYaml {
     private val yaml: Yaml?
     private val file: File?
 

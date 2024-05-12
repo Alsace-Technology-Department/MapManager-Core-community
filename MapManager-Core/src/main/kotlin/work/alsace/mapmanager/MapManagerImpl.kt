@@ -10,26 +10,26 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.TabExecutor
 import org.bukkit.plugin.java.JavaPlugin
 import work.alsace.mapmanager.common.command.*
-import work.alsace.mapmanager.common.function.DynamicWorld
-import work.alsace.mapmanager.service.IMainYaml
-import work.alsace.mapmanager.common.function.MapAgent
 import work.alsace.mapmanager.common.function.VersionBridge
 import work.alsace.mapmanager.common.listener.BlockListener
 import work.alsace.mapmanager.common.listener.PlayerListener
 import work.alsace.mapmanager.common.log.Log4JFilter
-import work.alsace.mapmanager.service.IDynamicWorld
-import work.alsace.mapmanager.service.IMapAgent
+import work.alsace.mapmanager.service.DynamicWorld
+import work.alsace.mapmanager.service.MainYaml
+import work.alsace.mapmanager.service.MapAgent
 import java.io.File
 import java.io.IOException
 import java.util.*
 
-class MapManager : JavaPlugin(), IMapManager {
-    private var dynamicWorld: IDynamicWorld? = null
-    private var mapAgent: IMapAgent? = null
+class MapManagerImpl : JavaPlugin(), MapManager {
+    private var instance: MapManager? = null
+    private var dynamicWorld: DynamicWorld? = null
+    private var mapAgent: MapAgent? = null
     private var luckPerms: LuckPerms? = null
-    private var yaml: IMainYaml? = null
+    private var yaml: MainYaml? = null
 
     override fun onEnable() {
+        instance = this
         server.consoleSender.sendMessage("[§6MapManager§7] §f启动中...")
 
         logger.info("正在加载配置...")
@@ -76,15 +76,15 @@ class MapManager : JavaPlugin(), IMapManager {
         return (dynamicWorld as DynamicWorld?)!!
     }
 
-    override fun setDynamicWorld(dynamicWorld: IDynamicWorld) {
+    override fun setDynamicWorld(dynamicWorld: DynamicWorld) {
         this.dynamicWorld = dynamicWorld
     }
 
     override fun getMapAgent(): MapAgent {
-        return (mapAgent as MapAgent?)!!
+        return (mapAgent as MapAgent)
     }
 
-    override fun setMapAgent(mapAgent: IMapAgent) {
+    override fun setMapAgent(mapAgent: MapAgent) {
         this.mapAgent = mapAgent
     }
 
@@ -92,11 +92,11 @@ class MapManager : JavaPlugin(), IMapManager {
         return luckPerms!!
     }
 
-    override fun getMainYaml(): IMainYaml {
+    override fun getMainYaml(): MainYaml {
         return yaml!!
     }
 
-    override fun setMainYaml(yaml: IMainYaml) {
+    override fun setMainYaml(yaml: MainYaml) {
         this.yaml = yaml
     }
 
@@ -151,5 +151,9 @@ class MapManager : JavaPlugin(), IMapManager {
                 null
             }
         }
+    }
+
+    override fun getInstance(): MapManager? {
+        return instance
     }
 }
