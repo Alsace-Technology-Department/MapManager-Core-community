@@ -12,23 +12,23 @@ import java.lang.reflect.Type
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-class FileIO<T>(plugin: Plugin?, fileName: String?, token: TypeToken<ConcurrentMap<String?, T?>?>?) {
-    private val file: File?
-    private val gson: Gson?
-    private val type: Type?
+class FileIO<T>(plugin: Plugin, fileName: String, token: TypeToken<ConcurrentMap<String?, T?>?>?) {
+    private val file: File
+    private val gson: Gson
+    private val type: Type
 
     init {
-        file = File(plugin?.dataFolder, "$fileName.json")
+        file = File(plugin.dataFolder, "$fileName.json")
         gson = GsonBuilder().setPrettyPrinting().create()
-        type = token?.type
+        type = token?.type!!
     }
 
     fun load(): ConcurrentMap<String, T> {
         try {
-            file?.let {
+            file.let {
                 FileReader(it).use { reader ->
                     // 使用 Gson 从 JSON 文件中解析数据
-                    return gson?.fromJson(reader, type) ?: ConcurrentHashMap()
+                    return gson.fromJson(reader, type) ?: ConcurrentHashMap()
                 }
             }
         } catch (e: IOException) {
@@ -39,9 +39,9 @@ class FileIO<T>(plugin: Plugin?, fileName: String?, token: TypeToken<ConcurrentM
 
     fun save(nodeMap: ConcurrentMap<String, T>): Boolean {
         try {
-            file?.let {
+            file.let {
                 FileWriter(it).use { writer ->
-                    gson?.toJson(nodeMap)?.let { it1 -> writer.write(it1) }
+                    gson.toJson(nodeMap)?.let { it1 -> writer.write(it1) }
                     writer.flush()
                 }
             }

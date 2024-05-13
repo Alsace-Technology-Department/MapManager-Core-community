@@ -5,13 +5,13 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import work.alsace.mapmanager.MapManagerImpl
 
-class WriteCommand(private val plugin: MapManagerImpl?) : CommandExecutor {
+class WriteCommand(private val plugin: MapManagerImpl) : CommandExecutor {
     override fun onCommand(sender: CommandSender, cmd: Command, label: String, args: Array<String>): Boolean {
         if (!sender.hasPermission("mapmanager.command.write")) {
             sender.sendMessage("§c你没有权限使用此命令")
             return true
         }
-        sender.sendMessage("Node Map:" + plugin?.getMapAgent()!!.getNodeMap())
+        sender.sendMessage("Node Map:" + plugin.getMapAgent().getNodeMap())
         sender.sendMessage("")
         sender.sendMessage("")
         sender.sendMessage("Group Map:" + plugin.getMapAgent().getGroupMap())

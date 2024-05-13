@@ -9,8 +9,8 @@ import work.alsace.mapmanager.service.MapAgent
 import java.util.*
 import java.util.stream.Collectors
 
-class MapAdminCommand(plugin: MapManagerImpl?) : TabExecutor {
-    private val mapAgent: MapAgent? = plugin?.getMapAgent()
+class MapAdminCommand(plugin: MapManagerImpl) : TabExecutor {
+    private val mapAgent: MapAgent = plugin.getMapAgent()
     private val subCommand: MutableList<String?> =
         mutableListOf("reload", "physics", "explosion", "sync", "save")
     private val emptyList: MutableList<String?> = ArrayList(0)
@@ -21,23 +21,20 @@ class MapAdminCommand(plugin: MapManagerImpl?) : TabExecutor {
         DISABLE
     }
 
-    private fun getOperation(name: String?): Operation? {
-        if (name != null) {
-            return when (name.lowercase(Locale.getDefault())) {
-                "on", "enable", "true", "yes" -> {
-                    ENABLE
-                }
+    private fun getOperation(name: String): Operation {
+        return when (name.lowercase(Locale.getDefault())) {
+            "on", "enable", "true", "yes" -> {
+                ENABLE
+            }
 
-                "off", "disable", "false", "no" -> {
-                    DISABLE
-                }
+            "off", "disable", "false", "no" -> {
+                DISABLE
+            }
 
-                else -> {
-                    CLEAR
-                }
+            else -> {
+                CLEAR
             }
         }
-        return null
     }
 
     override fun onTabComplete(
@@ -52,7 +49,7 @@ class MapAdminCommand(plugin: MapManagerImpl?) : TabExecutor {
             .filter { s: String? -> prefix.let { s!!.startsWith(it) } }
             ?.collect(Collectors.toList()) else if (args[0]
                 .equals("changepassword", ignoreCase = true)
-        ) mapAgent?.getWorlds()?.stream()?.filter { s: String? ->
+        ) mapAgent.getWorlds().stream().filter { s: String? ->
             prefix.let {
                 s!!.lowercase(Locale.getDefault()).startsWith(
                     it
@@ -73,7 +70,7 @@ class MapAdminCommand(plugin: MapManagerImpl?) : TabExecutor {
         }
         when (args[0].lowercase(Locale.getDefault())) {
             "reload" -> {
-                mapAgent?.reload()
+                mapAgent.reload()
                 sender.sendMessage("§a重载完毕")
             }
 
@@ -84,21 +81,19 @@ class MapAdminCommand(plugin: MapManagerImpl?) : TabExecutor {
                 }
                 when (getOperation(args[1])) {
                     ENABLE -> {
-                        mapAgent?.setPhysical(true)
+                        mapAgent.setPhysical(true)
                         sender.sendMessage("§a已开启全局物理")
                     }
 
                     CLEAR -> {
-                        mapAgent?.setPhysical(null)
+                        mapAgent.setPhysical(null)
                         sender.sendMessage("§a已清除全局物理设置")
                     }
 
                     DISABLE -> {
-                        mapAgent?.setPhysical(false)
+                        mapAgent.setPhysical(false)
                         sender.sendMessage("§a已关闭全局物理")
                     }
-
-                    null -> {}
                 }
             }
 
@@ -109,30 +104,28 @@ class MapAdminCommand(plugin: MapManagerImpl?) : TabExecutor {
                 }
                 when (getOperation(args[1])) {
                     ENABLE -> {
-                        mapAgent?.setExploded(true)
+                        mapAgent.setExploded(true)
                         sender.sendMessage("§a已开启全局爆炸破坏")
                     }
 
                     CLEAR -> {
-                        mapAgent?.setExploded(null)
+                        mapAgent.setExploded(null)
                         sender.sendMessage("§a已清除全局爆炸破坏设置")
                     }
 
                     DISABLE -> {
-                        mapAgent?.setExploded(false)
+                        mapAgent.setExploded(false)
                         sender.sendMessage("§a已关闭全局爆炸破坏")
                     }
-
-                    null -> {}
                 }
             }
 
             "sync" -> {
-                mapAgent?.syncWithLuckPerms(sender)
+                mapAgent.syncWithLuckPerms(sender)
             }
 
             "save" -> {
-                if (mapAgent?.save() == true) sender.sendMessage("§a保存成功") else sender.sendMessage("§c保存失败")
+                if (mapAgent.save()) sender.sendMessage("§a保存成功") else sender.sendMessage("§c保存失败")
             }
 
             else -> {

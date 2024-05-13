@@ -8,16 +8,16 @@ import work.alsace.mapmanager.MapManagerImpl
 import work.alsace.mapmanager.service.DynamicWorld
 import work.alsace.mapmanager.service.MapAgent
 
-class DeleteCommand(plugin: MapManagerImpl?) : TabExecutor {
+class DeleteCommand(plugin: MapManagerImpl) : TabExecutor {
     private val lastTime: MutableMap<String?, DeletionNode?> = HashMap()
-    private val world: DynamicWorld?
-    private val map: MapAgent?
+    private val world: DynamicWorld
+    private val map: MapAgent
     private val emptyList: MutableList<String?> = ArrayList(0)
     private val nullNode: DeletionNode = DeletionNode(-1, "§~.nullWorld")
 
     init {
-        world = plugin?.getDynamicWorld()
-        map = plugin?.getMapAgent()
+        world = plugin.getDynamicWorld()
+        map = plugin.getMapAgent()
     }
 
     override fun onTabComplete(
@@ -25,8 +25,8 @@ class DeleteCommand(plugin: MapManagerImpl?) : TabExecutor {
         cmd: Command,
         label: String,
         args: Array<String>
-    ): MutableList<out String?>? {
-        return if (sender.hasPermission("mapmanager.command.delete") && args.size == 1) world?.getWorlds(args[0]) else emptyList
+    ): MutableList<out String?> {
+        return if (sender.hasPermission("mapmanager.command.delete") && args.size == 1) world.getWorlds(args[0]) else emptyList
     }
 
     override fun onCommand(sender: CommandSender, cmd: Command, label: String, args: Array<out String>): Boolean {
@@ -53,7 +53,7 @@ class DeleteCommand(plugin: MapManagerImpl?) : TabExecutor {
                 }
             }
             if (node != null) {
-                if (!node.world?.let { world?.isExist(it) }!!) {
+                if (!node.world?.let { world.isExist(it) }!!) {
                     sender.sendMessage("§c世界" + node.world + "不存在")
                     return true
                 }
@@ -64,7 +64,7 @@ class DeleteCommand(plugin: MapManagerImpl?) : TabExecutor {
             sender.sendMessage("§e删除中...")
             try {
                 if (node != null) {
-                    if (node.world?.let { map?.deleteWorld(it) } == true) sender.sendMessage("§a删除成功") else sender.sendMessage("§c删除失败，详细请查看控制台")
+                    if (node.world?.let { map.deleteWorld(it) } == true) sender.sendMessage("§a删除成功") else sender.sendMessage("§c删除失败，详细请查看控制台")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

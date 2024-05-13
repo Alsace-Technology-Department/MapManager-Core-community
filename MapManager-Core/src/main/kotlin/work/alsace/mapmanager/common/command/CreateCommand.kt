@@ -9,7 +9,7 @@ import work.alsace.mapmanager.enums.MMWorldType
 import java.util.*
 import java.util.stream.Collectors
 
-class CreateCommand(private val plugin: MapManagerImpl?) : TabExecutor {
+class CreateCommand(private val plugin: MapManagerImpl) : TabExecutor {
     private val emptyList: MutableList<String?> = ArrayList(0)
     override fun onTabComplete(
         sender: CommandSender,
@@ -22,7 +22,7 @@ class CreateCommand(private val plugin: MapManagerImpl?) : TabExecutor {
         return if (index.let { args[it].length } < 2) emptyList else when (args[index].substring(0, 2)) {
             "n:" -> {
                 val prefix = args[index].lowercase(Locale.getDefault())
-                plugin?.getDynamicWorld()?.getPotentialWorlds()?.stream()
+                plugin.getDynamicWorld().getPotentialWorlds()?.stream()
                     ?.map { s: String? -> "n:$s" }
                     ?.filter { s: String? -> s?.lowercase(Locale.getDefault())!!.startsWith(prefix) }
                     ?.collect(Collectors.toList())
@@ -39,8 +39,8 @@ class CreateCommand(private val plugin: MapManagerImpl?) : TabExecutor {
 
             "o:" -> {
                 val prefix = args[index].lowercase(Locale.getDefault())
-                plugin?.server?.onlinePlayers?.stream()
-                    ?.map { p: Player? -> "o:" + p?.name }
+                plugin.server.onlinePlayers.stream()
+                    .map { p: Player? -> "o:" + p?.name }
                     ?.filter { s: String? -> s?.lowercase(Locale.getDefault())!!.startsWith(prefix) }
                     ?.collect(Collectors.toList())
             }
@@ -62,7 +62,6 @@ class CreateCommand(private val plugin: MapManagerImpl?) : TabExecutor {
         var color = "darkaqua"
         var group: String? = null
         var owner: String? = null
-        val generateType: MMWorldType
         for (arg in args) {
             when (arg.substring(0, 2)) {
                 "n:" -> name = arg.substring(2)
@@ -81,14 +80,14 @@ class CreateCommand(private val plugin: MapManagerImpl?) : TabExecutor {
         if (owner == null) owner = sender.name
         if (alias == null) alias = name
         if (group == null) group = name
-        generateType = when (generate) {
+        val generateType: MMWorldType = when (generate) {
             "void_gen" -> MMWorldType.VOID
             "normal" -> MMWorldType.NORMAL
             "nether" -> MMWorldType.NETHER
             "the_end" -> MMWorldType.END
             else -> MMWorldType.FLAT
         }
-        if (!plugin!!.getDynamicWorld().createWorld(name, alias, color, generateType)) {
+        if (!plugin.getDynamicWorld().createWorld(name, alias, color, generateType)) {
             sender.sendMessage("§c地图创建失败，请查看控制台以获取更多信息")
             return true
         }

@@ -16,7 +16,7 @@ import work.alsace.mapmanager.MapManagerImpl
 import work.alsace.mapmanager.service.MapAgent
 
 class BlockListener(plugin: MapManagerImpl) : Listener {
-    private val mapAgent: MapAgent?
+    private val mapAgent: MapAgent
 
     init {
         mapAgent = plugin.getMapAgent()
@@ -26,17 +26,17 @@ class BlockListener(plugin: MapManagerImpl) : Listener {
      * 检测物理效果
      */
     @EventHandler(priority = EventPriority.LOWEST)
-    fun onBlockPhysics(event: BlockPhysicsEvent?) {
-        if (!mapAgent?.isPhysical(event?.block?.world?.name!!)!!) event?.isCancelled = true
+    fun onBlockPhysics(event: BlockPhysicsEvent) {
+        if (!mapAgent.isPhysical(event.block.world.name)) event.isCancelled = true
     }
 
     /**
      * 检测物理效果
      */
     @EventHandler(priority = EventPriority.LOWEST)
-    fun onFallingBlock(event: EntitySpawnEvent?) {
-        if (mapAgent?.isPhysical(event?.location?.world?.name!!) == true) return
-        if (event?.entityType != EntityType.FALLING_BLOCK) return
+    fun onFallingBlock(event: EntitySpawnEvent) {
+        if (mapAgent.isPhysical(event.location.world.name)) return
+        if (event.entityType != EntityType.FALLING_BLOCK) return
         event.isCancelled = true
         event.location.block.setType((event.entity as FallingBlock).blockData.material, false)
     }
@@ -45,24 +45,24 @@ class BlockListener(plugin: MapManagerImpl) : Listener {
      * 检测爆炸效果
      */
     @EventHandler(priority = EventPriority.LOWEST)
-    fun onBlockExplode(event: BlockExplodeEvent?) {
-        if (mapAgent?.isExploded(event?.block?.world?.name!!) == true) event?.isCancelled = true
+    fun onBlockExplode(event: BlockExplodeEvent) {
+        if (mapAgent.isExploded(event.block.world.name)) event.isCancelled = true
     }
 
     /**
      * 检测爆炸效果
      */
     @EventHandler(priority = EventPriority.LOWEST)
-    fun onEntityExplode(event: EntityExplodeEvent?) {
-        if (mapAgent?.isExploded(event?.entity?.world?.name!!) == true) event?.isCancelled = true
+    fun onEntityExplode(event: EntityExplodeEvent) {
+        if (mapAgent.isExploded(event.entity.world.name)) event.isCancelled = true
     }
 
     /**
      * 检测龙蛋
      */
     @EventHandler
-    fun onDragonEggTeleport(event: PlayerInteractEvent?) {
-        if (event?.action != Action.RIGHT_CLICK_BLOCK) return
+    fun onDragonEggTeleport(event: PlayerInteractEvent) {
+        if (event.action != Action.RIGHT_CLICK_BLOCK) return
         if (event.clickedBlock?.type == Material.DRAGON_EGG) event.isCancelled = true
     }
 }
