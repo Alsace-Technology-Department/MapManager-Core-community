@@ -10,7 +10,6 @@ plugins {
     id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.3"
 }
 
-description = "A map manager plugin for Minecraft."
 group = "work.alsace.mapmanager"
 version = "3.1"
 
