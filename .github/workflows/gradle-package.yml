@@ -2,133 +2,106 @@ name: Create MapManager-Core
 
 on:
   release:
-    types: [created]
+    types: [ created ]
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out code
+      - name: 检出代码
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: 设置 JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
-      - name: Build with Gradle
+      - name: 为 Gradlew 赋予执行权限
+        run: chmod +x ./gradlew
+
+      - name: 使用 Gradle 构建
         run: ./gradlew build
 
-      - name: List build artifacts for Core
+      - name: 列出 MapManager-Core 构建产物
         run: ls -lah ./MapManager-Core/build/libs/
 
-      - name: Upload Core Artifact to GitHub Release
+      - name: 上传 Core 构件至 GitHub Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./MapManager-Core/build/libs/MapManager-Core-${{ github.event.release.tag_name }}.jar
-          # Assuming the tag name is used as the version. Adjust if necessary.
           asset_name: MapManager-Core-${{ github.event.release.tag_name }}.jar
           asset_content_type: application/java-archive
 
-      - name: List build artifacts for API
-        run: ls -lah ./MapManager-API/build/libs/
-
-      - name: Upload API Artifact to GitHub Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./MapManager-API/build/libs/MapManager-API-${{ github.event.release.tag_name }}.jar
-          # Adjust the asset_path if your Gradle project configuration produces a different jar name
-          asset_name: MapManager-API-${{ github.event.release.tag_name }}.jar
-          asset_content_type: application/java-archive
-  build-javadoc:
+  generate-and-upload-javadoc:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out code
+      - name: 检出代码
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: 设置 JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: 'adopt'
           cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-
-      - name: Generate Dokka Javadoc
+      - name: 生成 Dokka Javadoc
         run: ./gradlew dokkaJavadoc
 
-      - name: Archive Dokka Javadoc
+      - name: 归档 Dokka Javadoc
         uses: actions/upload-artifact@v3
         with:
           name: dokka-javadoc
-          path: build/dokka/javadoc  # 根据你的 dokka 配置中的输出路径修改此处
+          path: ./MapManager-API/build/dokka/javadoc
 
-      - name: 安装腾讯云依赖
-        run: |
-          sudo pip install coscmd
-          sudo pip install tccli
-
-      - name: 配置腾讯云依赖
+      - name: 上传到腾讯云COS并刷新CDN
         env:
           SECRET_ID: ${{ secrets.TCLOUD_API_ID }}
           SECRET_KEY: ${{ secrets.TCLOUD_API_KEY }}
           BUCKET: webapp-1318358151
           REGION: ap-shanghai
         run: |
+          sudo pip install coscmd tccli
           coscmd config -a $SECRET_ID -s $SECRET_KEY -b $BUCKET -r $REGION
-          tccli configure set secretId $SECRET_ID
-          tccli configure set secretKey $SECRET_KEY
-          tccli configure set region $REGION
-
-      - name: 上传到腾讯云COS并刷新CDN
-        run: |
-          coscmd upload -rfs --delete ./build/dokka/javadoc /javadoc
+          tccli configure set secretId $SECRET_ID secretKey $SECRET_KEY region $REGION
+          coscmd upload -rfs --delete ./MapManager-API/build/dokka/javadoc /javadoc
           tccli cdn PurgePathCache --cli-unfold-argument --Paths https://www.alsace.team/javadoc/ --FlushType flush
-  build-and-deploy:
-    runs-on: ubuntu-latest
 
+  publish-to-maven:
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out code
+      - name: 检出代码
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: 设置 JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: 'adopt'
           cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-
-      - name: Build with Gradle
+      - name: 使用 Gradle 构建
         run: ./gradlew build
 
-      - name: Sign Artifacts
+      - name: 签名构件
         run: ./gradlew sign
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Publish to Maven Repository
+      - name: 发布到 Maven 仓库
         run: ./gradlew publish
         env:
           CENTRAL_PORTAL_USERNAME: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
           CENTRAL_PORTAL_PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
 
-      - name: Create Source Jar
+      - name: 创建源码包
         run: ./gradlew sourcesEmptyJar
 
-      - name: Create Javadoc Jar
+      - name: 创建 Javadoc 包
         run: ./gradlew javadocEmptyJar
