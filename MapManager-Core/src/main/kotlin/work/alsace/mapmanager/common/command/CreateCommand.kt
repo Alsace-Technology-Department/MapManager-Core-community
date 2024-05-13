@@ -62,7 +62,7 @@ class CreateCommand(private val plugin: MapManagerImpl?) : TabExecutor {
         var color = "darkaqua"
         var group: String? = null
         var owner: String? = null
-        var generateType = MMWorldType.FLAT
+        val generateType: MMWorldType
         for (arg in args) {
             when (arg.substring(0, 2)) {
                 "n:" -> name = arg.substring(2)

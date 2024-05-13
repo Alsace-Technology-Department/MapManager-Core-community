@@ -65,6 +65,7 @@ class ImportCommand(private val plugin: MapManagerImpl?) : TabExecutor {
             sender.sendMessage("§c未指定地图名")
             return true
         }
+        if (owner == null) owner = sender.name
         if (alias == null) alias = name
         if (group == null) group = name
         if (!plugin?.getDynamicWorld()?.importWorld(name, alias, color)!!) {

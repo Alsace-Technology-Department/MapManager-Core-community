@@ -603,8 +603,8 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @param worldName 地图名
      * @param alias 别名
      */
-    override fun setWorldAlias(worldName: String?, alias: String) {
-        val world = dynamicWorld.getMVWorld(worldName!!)
+    override fun setWorldAlias(worldName: String, alias: String) {
+        val world = dynamicWorld.getMVWorld(worldName)
         val result = ignoreColor(alias, world!!.color)
         world.alias = result
     }
@@ -615,7 +615,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @param color ChatColor 颜色
      * @return 返回的字符串
      */
-    fun ignoreColor(string: String, color: ChatColor): String {
+    override fun ignoreColor(string: String, color: ChatColor): String {
         val hexPattern = Pattern.compile("&([A-Fa-f0-9k-oK-O]|R|r)")
         val matcher = hexPattern.matcher(string)
         val builder = StringBuilder(string.length)
@@ -630,7 +630,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      *
      * @param physical 新的物理规则状态。
      */
-    override fun setPhysical(physical: Boolean) {
+    override fun setPhysical(physical: Boolean?) {
         Companion.physical = physical
         config.setPhysical(physical)
         yaml.save(config)
@@ -661,7 +661,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      *
      * @param exploded 新的爆炸破坏状态。
      */
-    override fun setExploded(exploded: Boolean) {
+    override fun setExploded(exploded: Boolean?) {
         Companion.exploded = exploded
         config.setExploded(exploded)
         yaml.save(config)

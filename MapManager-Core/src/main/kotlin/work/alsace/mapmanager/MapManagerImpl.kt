@@ -72,7 +72,7 @@ class MapManagerImpl : JavaPlugin(), MapManager {
     }
 
     override fun getDynamicWorld(): DynamicWorld {
-        return (dynamicWorld as DynamicWorld?)!!
+        return dynamicWorld!!
     }
 
     override fun setDynamicWorld(dynamicWorld: DynamicWorld) {

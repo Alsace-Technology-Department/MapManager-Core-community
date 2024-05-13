@@ -1,6 +1,7 @@
 package work.alsace.mapmanager.service
 
 import net.luckperms.api.LuckPerms
+import org.bukkit.ChatColor
 import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -109,14 +110,14 @@ interface MapAgent {
      * @param worldName 地图名
      * @param alias 别名
      */
-    fun setWorldAlias(worldName: String?, alias: String)
+    fun setWorldAlias(worldName: String, alias: String)
 
     /**
      * 设置全局物理/方块更新规则状态。
      *
      * @param physical 新的物理/方块更新规则状态。
      */
-    fun setPhysical(physical: Boolean)
+    fun setPhysical(physical: Boolean?)
 
     /**
      * 设置指定世界的物理/方块更新规则状态。
@@ -139,7 +140,7 @@ interface MapAgent {
      *
      * @param exploded 新的爆炸破坏状态。
      */
-    fun setExploded(exploded: Boolean)
+    fun setExploded(exploded: Boolean?)
 
     /**
      * 设置指定世界的爆炸破坏状态。
@@ -262,4 +263,12 @@ interface MapAgent {
      * 与LuckPerms同步
      */
     fun syncWithLuckPerms(sender: CommandSender)
+
+    /**
+     * 忽略字符颜色
+     * @param string 字符串
+     * @param color ChatColor 颜色
+     * @return 返回的字符串
+     */
+    fun ignoreColor(string: String, color: ChatColor): String
 }

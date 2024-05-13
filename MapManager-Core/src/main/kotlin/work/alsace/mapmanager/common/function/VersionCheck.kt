@@ -45,7 +45,7 @@ class VersionCheck(private val plugin: MapManagerImpl) {
 
     /**
      * 检测地图文件版本是否合法
-     * @param dir File 地图文件夹
+     * @param file File 地图文件夹
      * @return true为合法，false不合法
      */
     private fun isLevelFileVersionCorrect(file: File): Boolean {
@@ -129,6 +129,7 @@ class VersionCheck(private val plugin: MapManagerImpl) {
      * 获取服务器版本
      * @return 服务器版本
      */
+    @Suppress("DEPRECATION")
     private val serverVersion: Int
         get() = plugin.server.unsafe.dataVersion
 }

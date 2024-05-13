@@ -64,7 +64,7 @@ class DeleteCommand(plugin: MapManagerImpl?) : TabExecutor {
             sender.sendMessage("§e删除中...")
             try {
                 if (node != null) {
-                    if (map?.deleteWorld(node.world) == true) sender.sendMessage("§a删除成功") else sender.sendMessage("§c删除失败，详细请查看控制台")
+                    if (node.world?.let { map?.deleteWorld(it) } == true) sender.sendMessage("§a删除成功") else sender.sendMessage("§c删除失败，详细请查看控制台")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
