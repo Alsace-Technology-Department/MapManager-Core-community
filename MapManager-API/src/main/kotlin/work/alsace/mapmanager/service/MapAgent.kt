@@ -3,6 +3,7 @@ package work.alsace.mapmanager.service
 import net.luckperms.api.LuckPerms
 import org.bukkit.World
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import work.alsace.mapmanager.pojo.WorldGroup
 import work.alsace.mapmanager.pojo.WorldNode
 import java.util.*
@@ -79,6 +80,14 @@ interface MapAgent {
     fun isPublic(world: String): Boolean
 
     /**
+     * 检测玩家是否为地图管理员
+     * @param player 玩家名称
+     * @param world 世界名称
+     * @return 是否为管理员，如果是返回true，否则返回false
+     */
+    fun isAdmin(player: String, world: String): Boolean
+
+    /**
      * 获取指定名称的玩家集合，基于指定的权限组筛选。
      *
      * @param worldName   世界名称。
@@ -94,6 +103,13 @@ interface MapAgent {
      * @return String 别名
      */
     fun getWorldAlias(worldName: String): String
+
+    /**
+     * 设置地图别名
+     * @param worldName 地图名
+     * @param alias 别名
+     */
+    fun setWorldAlias(worldName: String?, alias: String)
 
     /**
      * 设置全局物理/方块更新规则状态。
@@ -218,6 +234,13 @@ interface MapAgent {
      * @return 返回玩家的UUID。
      */
     fun getUniqueID(player: String): UUID?
+
+    /**
+     * 通过玩家名获取服务器玩家
+     * @param player 玩家id
+     * @return Player 玩家实体
+     */
+    fun getPlayer(player: String): Player?
 
     /**
      * 保存MapManager信息。

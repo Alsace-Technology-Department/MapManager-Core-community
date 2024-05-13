@@ -2,6 +2,7 @@ package work.alsace.mapmanager.service
 
 import com.onarandombox.MultiverseCore.api.MVWorldManager
 import com.onarandombox.MultiverseCore.api.MultiverseWorld
+import net.luckperms.api.model.user.User
 import org.bukkit.Location
 import work.alsace.mapmanager.enums.MMWorldType
 
@@ -157,4 +158,12 @@ interface DynamicWorld {
      * @return 如果成功创建，返回true；否则返回false。
      */
     fun createWorld(name: String, alias: String, color: String, generate: MMWorldType): Boolean
+
+    /**
+     * 判断玩家是否有权限
+     * @param user 玩家Luckperms实体
+     * @param permission 权限节点
+     * @return 结果
+     */
+    fun hasPermission(user: User, permission: String): Boolean
 }

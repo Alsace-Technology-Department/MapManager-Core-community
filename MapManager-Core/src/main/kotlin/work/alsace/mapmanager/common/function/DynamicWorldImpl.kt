@@ -3,10 +3,7 @@ package work.alsace.mapmanager.common.function
 import com.onarandombox.MultiverseCore.MultiverseCore
 import com.onarandombox.MultiverseCore.api.MVWorldManager
 import com.onarandombox.MultiverseCore.api.MultiverseWorld
-import net.luckperms.api.node.Node
-import net.luckperms.api.node.NodeType
-import net.luckperms.api.node.types.PermissionNode
-import net.luckperms.api.query.QueryOptions
+import net.luckperms.api.model.user.User
 import org.bukkit.*
 import org.bukkit.scheduler.BukkitRunnable
 import work.alsace.mapmanager.MapManagerImpl
@@ -183,14 +180,23 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
         val user = userFuture.join() ?: return emptyList()
         plugin.logger.info(user.username)
         return getWorlds("").stream()
-            .filter { world: String ->
-                user.getNodes(NodeType.PERMISSION).stream()
-                    .anyMatch { node: PermissionNode ->
-                        node.key == "mapmanager.admin." + world.lowercase(
-                            Locale.getDefault()
-                        ) && node.value
-                    }
+            .map { world: String ->
+                plugin.getMapAgent().getWorldGroupName(
+                    world
+                )
             }
+            .filter { group: String? ->
+                hasPermission(
+                    user,
+                    "mapmanager.admin.$group"
+                )
+            }
+            .flatMap { group: String? ->
+                plugin.getMapAgent().getWorldListByGroup(
+                    group!!
+                )!!.stream()
+            }
+            .distinct()
             .collect(Collectors.toList())
     }
 
@@ -207,15 +213,11 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
         )
         val user = userFuture?.join() ?: return emptyList()
 
-        val permissionPrefix = "multiverse.access."
-        return user.resolveInheritedNodes(QueryOptions.nonContextual())
-            .stream()
-            .filter { node: Node -> node is PermissionNode }
-            .map { obj: Node -> obj.key }
-            .filter { key: String -> key.startsWith(permissionPrefix) }
-            .map { key: String ->
-                key.substring(
-                    permissionPrefix.length
+        return getWorlds("").stream()
+            .filter { world: String ->
+                hasPermission(
+                    user,
+                    "multiverse.access.$world"
                 )
             }
             .collect(Collectors.toList())
@@ -410,5 +412,15 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
         if (world != null) {
             if (world.cbWorld.players.size == 0) name?.let { unloadWorldLater(it) }
         }
+    }
+
+    /**
+     * 判断玩家是否有权限
+     * @param user 玩家Luckperms实体
+     * @param permission 权限节点
+     * @return 结果
+     */
+    override fun hasPermission(user: User, permission: String): Boolean {
+        return user.cachedData.permissionData.checkPermission(permission).asBoolean()
     }
 }

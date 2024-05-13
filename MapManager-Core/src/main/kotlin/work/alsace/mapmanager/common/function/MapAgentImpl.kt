@@ -15,6 +15,7 @@ import org.bukkit.ChatColor
 import org.bukkit.OfflinePlayer
 import org.bukkit.World
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import work.alsace.mapmanager.MapManagerImpl
 import work.alsace.mapmanager.pojo.MainConfig
 import work.alsace.mapmanager.pojo.WorldGroup
@@ -29,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ExecutionException
 import java.util.function.Consumer
+import java.util.regex.Pattern
 import java.util.stream.Collectors
 
 /**
@@ -110,6 +112,23 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
             return online.uniqueId
         }
         return null
+    }
+
+    /**
+     * 通过玩家名获取服务器玩家
+     * @param player 玩家id
+     * @return Player 玩家实体
+     */
+    override fun getPlayer(player: String): Player? {
+        val online = plugin.server.getPlayer(player)
+        if (online == null) {
+            player.lowercase(Locale.getDefault())
+            for (off in plugin.server.offlinePlayers) {
+                val name = off.name
+                if (name != null && name.lowercase(Locale.getDefault()) == player) return plugin.server.getPlayer(off.uniqueId)
+            }
+        }
+        return online
     }
 
     private fun getProcess(owner: String?): CompletableFuture<User?>? {
@@ -436,6 +455,22 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
         return color == ChatColor.GOLD || color == ChatColor.DARK_GREEN
     }
 
+    /**
+     * 检测玩家是否为地图管理员
+     * @param player 玩家名称
+     * @param world 世界名称
+     * @return 是否为管理员，如果是返回true，否则返回false
+     */
+    override fun isAdmin(player: String, world: String): Boolean {
+        val luckPerms = plugin.getLuckPerms()
+        val playerUuid = plugin.getMapAgent().getUniqueID(player)
+        val userFuture = luckPerms.userManager.loadUser(
+            playerUuid!!
+        )
+        val user = userFuture.join() ?: return false
+        return dynamicWorld.hasPermission(user, "mapmanager.admin." + getWorldGroupName(world))
+    }
+
     //name -> group name | world name
     /**
      * 获取指定名称的玩家集合，基于指定的权限组筛选。
@@ -561,6 +596,33 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      */
     override fun getWorldAlias(worldName: String): String {
         return dynamicWorld.getMVWorld(worldName)!!.alias
+    }
+
+    /**
+     * 设置地图别名
+     * @param worldName 地图名
+     * @param alias 别名
+     */
+    override fun setWorldAlias(worldName: String?, alias: String) {
+        val world = dynamicWorld.getMVWorld(worldName!!)
+        val result = ignoreColor(alias, world!!.color)
+        world.alias = result
+    }
+
+    /**
+     * 忽略字符颜色
+     * @param string 字符串
+     * @param color ChatColor 颜色
+     * @return 返回的字符串
+     */
+    fun ignoreColor(string: String, color: ChatColor): String {
+        val hexPattern = Pattern.compile("&([A-Fa-f0-9k-oK-O]|R|r)")
+        val matcher = hexPattern.matcher(string)
+        val builder = StringBuilder(string.length)
+        while (matcher.find()) {
+            matcher.appendReplacement(builder, "&" + color + matcher.group(0)[1])
+        }
+        return matcher.appendTail(builder).toString()
     }
 
     /**
