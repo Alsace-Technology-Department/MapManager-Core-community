@@ -1,8 +1,10 @@
-package work.alsace.mapmanager.common.function
+package work.alsace.mapmanager.common.version
 
 import work.alsace.mapmanager.MapManagerImpl
 import work.alsace.mapmanager.command.WorldCommandV116
 import work.alsace.mapmanager.command.WorldCommandV120
+import work.alsace.mapmanager.common.function.DynamicWorldImpl
+import work.alsace.mapmanager.common.function.MapAgentImpl
 import work.alsace.mapmanager.function.MainYamlV116
 import work.alsace.mapmanager.function.MainYamlV120
 

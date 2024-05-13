@@ -40,7 +40,7 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
             )
                 .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-DBtWdNaH9oS1FJxCBNrcSsbAnjf"))
         )
-    private val subCommand1: MutableList<String?> = mutableListOf(
+    private val subCommand1: MutableList<String> = mutableListOf(
         "admin",
         "admins",
         "builder",
@@ -56,7 +56,7 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
         "setspawn",
         "setname",
     )
-    private val subCommandToggle: MutableList<String?> =
+    private val subCommandToggle: MutableList<String> =
         mutableListOf("on", "enable", "true", "yes", "off", "disable", "false", "no", "info", "status")
     private val emptyList: MutableList<String?> = ArrayList(0)
     private val format: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
@@ -68,47 +68,36 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
         DISABLE
     }
 
-    private fun getOperation(name: String?): Operation? {
-        if (name != null) {
-            return when (name.lowercase(Locale.getDefault())) {
-                "on", "enable", "true", "yes" -> {
-                    ENABLE
-                }
+    private fun getOperation(name: String): Operation {
+        return when (name.lowercase(Locale.getDefault())) {
+            "on", "enable", "true", "yes" -> {
+                ENABLE
+            }
 
-                "off", "disable", "false", "no" -> {
-                    DISABLE
-                }
+            "off", "disable", "false", "no" -> {
+                DISABLE
+            }
 
-                else -> {
-                    STATUS
-                }
+            else -> {
+                STATUS
             }
         }
-        return null
     }
 
-    private fun getList(prefix: String?, collection: MutableCollection<String?>?): MutableList<String?>? {
-        return collection?.stream()
-            ?.filter { s: String? ->
-                prefix?.let {
-                    s!!.lowercase(Locale.getDefault()).startsWith(
-                        it
-                    )
-                } == true
-            }
-            ?.collect(Collectors.toList())
+    private fun getList(prefix: String, collection: MutableCollection<String>): MutableList<String?>? {
+        return collection.stream().filter { s: String ->
+            s.lowercase(
+                Locale.getDefault()
+            ).startsWith(prefix)
+        }.collect(Collectors.toList())
     }
 
-    private fun getList(prefix: String?, vararg args: String?): MutableList<String?>? {
-        return Stream.of(*args)
-            .filter { s: String? ->
-                prefix?.let {
-                    s!!.lowercase(Locale.getDefault()).startsWith(
-                        it
-                    )
-                } == true
-            }
-            .collect(Collectors.toList())
+    private fun getList(prefix: String, vararg args: String): MutableList<String?>? {
+        return Stream.of(*args).filter { s: String ->
+            s.lowercase(
+                Locale.getDefault()
+            ).startsWith(prefix)
+        }.collect(Collectors.toList())
     }
 
     override fun onTabComplete(
@@ -148,9 +137,9 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                         }
 
                         "tp" -> {
-                            dynamicWorld.getWorlds(args[0]).stream()
-                                .filter { world: String? -> sender.hasPermission("multiverse.access.$world") }
-                                ?.collect(Collectors.toList())
+                            dynamicWorld.getWorlds("").stream()
+                                .filter { world: String -> sender.hasPermission("multiverse.access.$world") }
+                                .collect(Collectors.toList())
                         }
 
                         else -> {
@@ -171,9 +160,13 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     } else if (args[1].equals("remove", ignoreCase = true)) {
                         val prefix = args[2].lowercase(Locale.getDefault())
                         when (args[0].lowercase(Locale.getDefault())) {
-                            "admin" -> getList(prefix, mapAgent.getAdminSet(sender.world))
-                            "builder" -> getList(prefix, mapAgent.getBuilderSet(sender.world))
-                            "visitor" -> getList(prefix, mapAgent.getVisitorSet(sender.world))
+                            "admin" -> getList(
+                                prefix,
+                                mapAgent.getAdminSet(sender.world)!!
+                            )!!
+
+                            "builder" -> getList(prefix, mapAgent.getBuilderSet(sender.world)!!)!!
+                            "visitor" -> getList(prefix, mapAgent.getVisitorSet(sender.world)!!)!!
                             else -> emptyList
                         }
                     } else emptyList
@@ -183,7 +176,6 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
             else -> {
                 emptyList
             }
-
         }
     }
 
@@ -234,8 +226,8 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
             }
 
             "admins" -> {
-                val admins: MutableSet<String?>? = try {
-                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name), MapGroup.ADMIN)?.get()
+                val admins: MutableSet<String> = try {
+                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name)!!, MapGroup.ADMIN).get()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                     sender.sendMessage("§c管理员列表查询失败，请联系管理员以解决该问题")
@@ -245,7 +237,7 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     sender.sendMessage("§c管理员列表查询失败，请联系管理员以解决该问题")
                     return false
                 }
-                if (admins.isNullOrEmpty()) {
+                if (admins.isEmpty()) {
                     sender.sendMessage("§7该地图暂未设置管理员")
                     return false
                 }
@@ -255,7 +247,8 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     ChatColor.DARK_AQUA,
                     ChatColor.AQUA,
                     "admin",
-                    "管理员"
+                    "管理员",
+                    sender
                 ) else for (name in admins) sender.sendMessage(
                     "§3> §b$name"
                 )
@@ -303,8 +296,8 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     sender.sendMessage("§e该地图为公共地图，所有玩家均可进入并自由建筑")
                     return false
                 }
-                val builders: MutableSet<String?>? = try {
-                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name), MapGroup.BUILDER)?.get()
+                val builders: MutableSet<String> = try {
+                    mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name)!!, MapGroup.BUILDER).get()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                     sender.sendMessage("§c管理员列表查询失败，请联系管理员以解决该问题")
@@ -314,7 +307,7 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     sender.sendMessage("§c管理员列表查询失败，请联系管理员以解决该问题")
                     return false
                 }
-                if (builders.isNullOrEmpty()) {
+                if (builders.isEmpty()) {
                     sender.sendMessage("§7该地图暂未设置建筑人员")
                     return false
                 }
@@ -324,7 +317,8 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     ChatColor.GOLD,
                     ChatColor.YELLOW,
                     "builder",
-                    "建筑人员"
+                    "建筑人员",
+                    sender
                 ) else for (name in builders) sender.sendMessage(
                     "§6> §e$name"
                 )
@@ -369,8 +363,8 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     sender.sendMessage("§a该地图允许任何玩家进来参观")
                     return false
                 }
-                val visitors: MutableSet<String?>? = try {
-                    mapAgent.getPlayers(sender.world.name, MapGroup.VISITOR)?.get()
+                val visitors: MutableSet<String> = try {
+                    mapAgent.getPlayers(sender.world.name, MapGroup.VISITOR).get()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                     sender.sendMessage("§c参观人员列表查询失败，请联系管理员以解决该问题")
@@ -380,7 +374,7 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     sender.sendMessage("§c参观人员列表查询失败，请联系管理员以解决该问题")
                     return false
                 }
-                if (visitors.isNullOrEmpty()) {
+                if (visitors.isEmpty()) {
                     sender.sendMessage("§7该地图暂未设置可进来参观的玩家")
                     return false
                 }
@@ -390,7 +384,8 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     ChatColor.DARK_GREEN,
                     ChatColor.GREEN,
                     "visitor",
-                    "参观"
+                    "参观",
+                    sender
                 ) else for (name in visitors) sender.sendMessage(
                     "§2> §a$name"
                 )
@@ -470,10 +465,6 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                         //show the status
                         sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 方块更新")
                     }
-
-                    null -> {
-                        return false
-                    }
                 }
             }
 
@@ -500,10 +491,6 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     STATUS -> {
                         //show the status
                         sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 爆炸破坏")
-                    }
-
-                    null -> {
-                        return false
                     }
                 }
             }
@@ -544,10 +531,6 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                                     + " PVP"
                         )
                     }
-
-                    null -> {
-                        return false
-                    }
                 }
             }
 
@@ -577,8 +560,6 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                         //show the status
                         sender.sendMessage("§b当前地图已 " + if (mapAgent.isPublic(sender.world.name)) "公开" else "未公开")
                     }
-
-                    null -> {}
                 }
             }
 
@@ -667,9 +648,16 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
         return true
     }
 
-    private fun listMembers(set: MutableSet<String?>, a: ChatColor, b: ChatColor, group: String, perm: String) {
+    private fun listMembers(
+        set: MutableSet<String>,
+        a: ChatColor,
+        b: ChatColor,
+        group: String,
+        perm: String,
+        sender: CommandSender
+    ) {
         for (name in set) {
-            if (name?.isEmpty() == true) continue
+            if (name.isEmpty()) continue
 
             val prefix = TextComponent("$a> ")
             val body = TextComponent(b.toString() + name)
@@ -682,8 +670,7 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                 "/world $group remove $name"
             )
 
-            sender!!.sendMessage(prefix, body)
+            sender.sendMessage(prefix, body)
         }
     }
-
 }

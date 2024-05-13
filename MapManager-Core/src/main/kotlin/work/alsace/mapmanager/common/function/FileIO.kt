@@ -23,7 +23,7 @@ class FileIO<T>(plugin: Plugin?, fileName: String?, token: TypeToken<ConcurrentM
         type = token?.type
     }
 
-    fun load(): ConcurrentMap<String?, T?> {
+    fun load(): ConcurrentMap<String, T> {
         try {
             file?.let {
                 FileReader(it).use { reader ->
@@ -37,11 +37,7 @@ class FileIO<T>(plugin: Plugin?, fileName: String?, token: TypeToken<ConcurrentM
         return ConcurrentHashMap()
     }
 
-    fun save(nodeMap: ConcurrentMap<String?, T?>?): Boolean {
-        if (nodeMap == null) {
-            println("nodeMap is null")
-            return false
-        }
+    fun save(nodeMap: ConcurrentMap<String, T>): Boolean {
         try {
             file?.let {
                 FileWriter(it).use { writer ->

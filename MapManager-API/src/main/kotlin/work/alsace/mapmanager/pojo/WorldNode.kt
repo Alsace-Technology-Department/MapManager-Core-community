@@ -3,10 +3,10 @@ package work.alsace.mapmanager.pojo
 import java.util.*
 
 class WorldNode {
-    private var group: String?
+    private var group: String
     private var exploded: Boolean
     private var physical: Boolean
-    private var visitors: MutableSet<String?>?
+    private var visitors: MutableSet<String>
 
     constructor() {
         group = "__nil"
@@ -15,7 +15,7 @@ class WorldNode {
         visitors = TreeSet()
     }
 
-    constructor(group: String?) {
+    constructor(group: String) {
         this.group = group
         exploded = false
         physical = true
@@ -26,7 +26,7 @@ class WorldNode {
      * 获取世界分组。
      * @return 世界分组。
      */
-    fun getGroup(): String? {
+    fun getGroup(): String {
         return group
     }
 
@@ -34,7 +34,7 @@ class WorldNode {
      * 设置世界分组。
      * @param group 世界分组。
      */
-    fun setGroup(group: String?) {
+    fun setGroup(group: String) {
         this.group = group
     }
 
@@ -74,7 +74,7 @@ class WorldNode {
      * 获取世界访问者。
      * @return 世界访问者。
      */
-    fun getVisitors(): MutableSet<String?>? {
+    fun getVisitors(): MutableSet<String> {
         return visitors
     }
 
@@ -82,7 +82,7 @@ class WorldNode {
      * 设置世界访问者。
      * @param visitors 世界访问者。
      */
-    fun setVisitors(visitors: MutableSet<String?>?) {
+    fun setVisitors(visitors: MutableSet<String>) {
         this.visitors = visitors
     }
 
@@ -91,8 +91,8 @@ class WorldNode {
      * @param player 玩家名称。
      * @return 是否添加成功。
      */
-    fun addVisitor(player: String?): Boolean {
-        return visitors?.add(player) == true
+    fun addVisitor(player: String): Boolean {
+        return visitors.add(player)
     }
 
     /**
@@ -100,8 +100,8 @@ class WorldNode {
      * @param player 玩家名称。
      * @return 是否移除成功。
      */
-    fun removeVisitor(player: String?): Boolean {
-        return visitors?.remove(player) == true
+    fun removeVisitor(player: String): Boolean {
+        return visitors.remove(player)
     }
 
     /**

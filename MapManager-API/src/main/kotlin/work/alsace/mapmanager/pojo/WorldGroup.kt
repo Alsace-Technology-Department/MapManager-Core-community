@@ -5,9 +5,9 @@ import java.util.stream.Collectors
 import java.util.stream.Stream
 
 class WorldGroup {
-    private var admins: MutableSet<String?>? = null
-    private var builders: MutableSet<String?>? = null
-    private var worlds: MutableSet<String?>?
+    private var admins: MutableSet<String>
+    private var builders: MutableSet<String>
+    private var worlds: MutableSet<String>
 
     constructor() {
         admins = TreeSet()
@@ -15,21 +15,16 @@ class WorldGroup {
         worlds = TreeSet()
     }
 
-    constructor(world: String?, owner: String?) {
-        if (owner == null) {
-            admins = TreeSet()
-            builders = TreeSet()
-        } else {
-            admins = Stream.of(owner).collect(Collectors.toSet())
-            builders = Stream.of(owner).collect(Collectors.toSet())
-        }
-        worlds = if (world == null) TreeSet() else Stream.of(world).collect(Collectors.toSet())
+    constructor(world: String, owner: String) {
+        admins = Stream.of(owner).collect(Collectors.toSet())
+        builders = Stream.of(owner).collect(Collectors.toSet())
+        worlds = Stream.of(world).collect(Collectors.toSet())
     }
 
-    constructor(world: String?) {
+    constructor(world: String) {
         admins = TreeSet()
         builders = TreeSet()
-        worlds = if (world == null) TreeSet() else Stream.of(world).collect(Collectors.toSet())
+        worlds = Stream.of(world).collect(Collectors.toSet())
     }
 
     /**
@@ -37,8 +32,8 @@ class WorldGroup {
      * @param admin 管理员。
      * @return 是否添加成功。
      */
-    fun addAdmin(admin: String?): Boolean {
-        return admins?.add(admin) == true
+    fun addAdmin(admin: String): Boolean {
+        return admins.add(admin)
     }
 
     /**
@@ -46,8 +41,8 @@ class WorldGroup {
      * @param builder 建造者。
      * @return 是否添加成功。
      */
-    fun addBuilder(builder: String?): Boolean {
-        return builders?.add(builder) == true
+    fun addBuilder(builder: String): Boolean {
+        return builders.add(builder)
     }
 
     /**
@@ -55,8 +50,8 @@ class WorldGroup {
      * @param world 世界。
      * @return 是否添加成功。
      */
-    fun addWorld(world: String?): Boolean {
-        return worlds?.add(world) == true
+    fun addWorld(world: String): Boolean {
+        return worlds.add(world)
     }
 
     /**
@@ -64,8 +59,8 @@ class WorldGroup {
      * @param admin 管理员。
      * @return 是否移除成功。
      */
-    fun removeAdmin(admin: String?): Boolean {
-        return admins?.remove(admin) == true
+    fun removeAdmin(admin: String): Boolean {
+        return admins.remove(admin)
     }
 
     /**
@@ -73,8 +68,8 @@ class WorldGroup {
      * @param builder 建造者。
      * @return 是否移除成功。
      */
-    fun removeBuilder(builder: String?): Boolean {
-        return builders?.remove(builder) == true
+    fun removeBuilder(builder: String): Boolean {
+        return builders.remove(builder)
     }
 
     /**
@@ -82,15 +77,15 @@ class WorldGroup {
      * @param world 世界。
      * @return 是否移除成功。
      */
-    fun removeWorld(world: String?): Boolean {
-        return worlds?.remove(world) == true
+    fun removeWorld(world: String): Boolean {
+        return worlds.remove(world)
     }
 
     /**
      * 获取管理员。
      * @return 管理员。
      */
-    fun getAdmins(): MutableSet<String?>? {
+    fun getAdmins(): MutableSet<String> {
         return admins
     }
 
@@ -98,7 +93,7 @@ class WorldGroup {
      * 获取建造者。
      * @return 建造者。
      */
-    fun getBuilders(): MutableSet<String?>? {
+    fun getBuilders(): MutableSet<String> {
         return builders
     }
 
@@ -106,7 +101,7 @@ class WorldGroup {
      * 获取世界。
      * @return 世界。
      */
-    fun getWorlds(): MutableSet<String?>? {
+    fun getWorlds(): MutableSet<String> {
         return worlds
     }
 
@@ -114,7 +109,7 @@ class WorldGroup {
      * 设置管理员。
      * @param admins 管理员。
      */
-    fun setAdmins(admins: MutableSet<String?>?) {
+    fun setAdmins(admins: MutableSet<String>) {
         this.admins = admins
     }
 
@@ -122,7 +117,7 @@ class WorldGroup {
      * 设置建造者。
      * @param builders 建造者。
      */
-    fun setBuilders(builders: MutableSet<String?>?) {
+    fun setBuilders(builders: MutableSet<String>) {
         this.builders = builders
     }
 
@@ -130,7 +125,7 @@ class WorldGroup {
      * 设置世界。
      * @param worlds 世界。
      */
-    fun setWorlds(worlds: MutableSet<String?>?) {
+    fun setWorlds(worlds: MutableSet<String>) {
         this.worlds = worlds
     }
 

@@ -10,7 +10,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.TabExecutor
 import org.bukkit.plugin.java.JavaPlugin
 import work.alsace.mapmanager.common.command.*
-import work.alsace.mapmanager.common.function.VersionBridge
+import work.alsace.mapmanager.common.version.VersionBridge
 import work.alsace.mapmanager.common.listener.BlockListener
 import work.alsace.mapmanager.common.listener.PlayerListener
 import work.alsace.mapmanager.common.log.Log4JFilter
@@ -27,7 +27,6 @@ class MapManagerImpl : JavaPlugin(), MapManager {
     private var mapAgent: MapAgent? = null
     private var luckPerms: LuckPerms? = null
     private var yaml: MainYaml? = null
-
     override fun onEnable() {
         instance = this
         server.consoleSender.sendMessage("[§6MapManager§7] §f启动中...")
