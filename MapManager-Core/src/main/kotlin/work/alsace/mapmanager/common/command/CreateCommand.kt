@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 import work.alsace.mapmanager.MapManagerImpl
+import work.alsace.mapmanager.enums.MMWorldType
 import java.util.*
 import java.util.stream.Collectors
 
@@ -61,6 +62,7 @@ class CreateCommand(private val plugin: MapManagerImpl?) : TabExecutor {
         var color = "darkaqua"
         var group: String? = null
         var owner: String? = null
+        var generateType = MMWorldType.FLAT
         for (arg in args) {
             when (arg.substring(0, 2)) {
                 "n:" -> name = arg.substring(2)
@@ -76,10 +78,17 @@ class CreateCommand(private val plugin: MapManagerImpl?) : TabExecutor {
             sender.sendMessage("§c未指定地图名")
             return true
         }
+        if (owner == null) owner = sender.name
         if (alias == null) alias = name
         if (group == null) group = name
-        if (generate == null) generate = "flat"
-        if (!plugin!!.getDynamicWorld().createWorld(name, alias, color, generate)) {
+        generateType = when (generate) {
+            "void_gen" -> MMWorldType.VOID
+            "normal" -> MMWorldType.NORMAL
+            "nether" -> MMWorldType.NETHER
+            "the_end" -> MMWorldType.END
+            else -> MMWorldType.FLAT
+        }
+        if (!plugin!!.getDynamicWorld().createWorld(name, alias, color, generateType)) {
             sender.sendMessage("§c地图创建失败，请查看控制台以获取更多信息")
             return true
         }

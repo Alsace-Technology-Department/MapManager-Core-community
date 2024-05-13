@@ -88,7 +88,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
         return groupMap.getOrDefault(getWorldGroupName(world), nullWorldGroup)
     }
 
-    private fun getWorldGroupByName(group: String?): WorldGroup? {
+    private fun getWorldGroupByName(group: String): WorldGroup? {
         return groupMap.getOrDefault(group, nullWorldGroup)
     }
 
@@ -124,41 +124,36 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @param owner 世界拥有者的玩家名。
      * @param group 权限组名称。
      */
-    override fun newWorld(world: String, owner: String, group: String) {
-        val w = world.lowercase(Locale.getDefault())
-        val g = group.lowercase(Locale.getDefault())
+    override fun newWorld(world: String, owner: String, group: String): CompletableFuture<Void> {
+        val worldLowerCase = world.lowercase(Locale.getDefault())
+        val groupLowerCase = group.lowercase(Locale.getDefault())
         val manager = luckPerms.groupManager
-        g.let {
-            manager.createAndLoadGroup(it).thenApplyAsync<Group?> { lp: Group? ->
-                val data = lp?.data()
-                data?.add(PermissionNode.builder("multiverse.access.$w").build())
-                data?.add(InheritanceNode.builder("default").build())
-                data?.add(
-                    InheritanceNode.builder("worldbase").withContext(DefaultContextKeys.WORLD_KEY, w).build()
-                )
-                data?.add(InheritanceNode.builder("apply").build())
-                data?.add(WeightNode.builder(1).build())
-                if (lp != null) {
-                    manager.saveGroup(lp)
-                    plugin.logger.info("权限组" + lp.name + "已创建并初始化完毕")
-                }
-                lp
-            }?.thenAcceptBoth<User?>(getProcess(owner)) { lp: Group?, user: User? ->
-                if (user == null) {
-                    plugin.logger.warning("未找到对应玩家")
-                    return@thenAcceptBoth
-                }
-                user.data().add(PermissionNode.builder("mapmanager.admin.$g").build())
-                user.data().add(InheritanceNode.builder(lp!!).build())
-                luckPerms.userManager.saveUser(user)
-                plugin.logger.info("已将" + user.username + "添加至" + g + "权限组")
-            }?.thenRun {
-                nodeMap[world] = WorldNode(g)
-                if (groupMap.containsKey(g)) getWorldGroupByName(g)?.addWorld(world) else {
-                    groupMap[g] = WorldGroup(world, owner)
-                }
-                save()
+        return manager.createAndLoadGroup(groupLowerCase).thenApplyAsync { lp: Group ->
+            val data = lp.data()
+            data.add(PermissionNode.builder("multiverse.access.$worldLowerCase").build())
+            data.add(InheritanceNode.builder("default").build())
+            data.add(
+                InheritanceNode.builder("worldbase").withContext(DefaultContextKeys.WORLD_KEY, worldLowerCase).build()
+            )
+            data.add(InheritanceNode.builder("apply").build())
+            data.add(WeightNode.builder(1).build())
+            manager.saveGroup(lp)
+            plugin.logger.info("权限组" + lp.name + "已创建并初始化完毕")
+            lp
+        }.thenAcceptBoth<User>(
+            getProcess(owner)
+        ) { lp: Group, user: User ->
+            user.data().add(PermissionNode.builder("mapmanager.admin.$groupLowerCase").build())
+            user.data().add(InheritanceNode.builder(lp).build())
+            luckPerms.userManager.saveUser(user)
+            plugin.logger.info("已将" + user.username + "添加至" + groupLowerCase + "权限组")
+        }.thenRun {
+            nodeMap[world] = WorldNode(groupLowerCase)
+            if (groupMap.containsKey(groupLowerCase)) getWorldGroupByName(groupLowerCase)?.addWorld(world) else {
+                groupMap[groupLowerCase] =
+                    WorldGroup(world, owner)
             }
+            save()
         }
     }
 
@@ -335,7 +330,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @param player 玩家名称。
      * @return 操作成功返回true，否则返回false。
      */
-    override fun removePlayer(world: String, group: Int, player: String): Boolean {
+    override fun removePlayer(world: String, group: MapGroup, player: String): Boolean {
         val worldGroup = getWorldGroupName(world)
         if (world == "__nil") {
             plugin.logger.warning("§c无法找到" + world + "对应的权限组")
@@ -362,7 +357,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
         }
         val user = luckPerms.userManager.loadUser(uuid).join()
         when (group) {
-            0 -> {
+            MapGroup.ADMIN -> {
                 run {
                     user?.data()?.remove(PermissionNode.builder("mapmanager.admin.$worldGroup").build())
                     removeAdmin(world, name)
@@ -374,13 +369,13 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
                 }
             }
 
-            1 -> {
+            MapGroup.BUILDER -> {
                 worldGroup.let { InheritanceNode.builder(it!!).build() }.let { user?.data()?.remove(it) }
                 removeBuilder(world, name)
                 groupIO?.save(groupMap)
             }
 
-            2 -> {
+            MapGroup.VISITOR -> {
                 user?.data()
                     ?.remove(
                         PermissionNode.builder("multiverse.access." + world.lowercase(Locale.getDefault())).build()
@@ -490,25 +485,8 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
     }
 
     private fun putWorldGroup(group: String, world: String) {
-        if (groupMap.containsKey(group)) getWorldGroupByName(group)?.addWorld(world) else groupMap[group] = WorldGroup(world)
-    }
-
-    /**
-     * 获取玩家可以进入的所有世界
-     * @param name 玩家名
-     * @return 玩家可进入的所有世界列表
-     */
-    override fun getAccessWorlds(name: String): List<String> {
-        return dynamicWorld.getWorlds("").stream()
-            .filter { world ->
-                Objects.requireNonNull(
-                    Bukkit.getServer().getPlayer(
-                        name
-                    )
-                )
-                    ?.hasPermission("multiverse.access.$world") == true
-            }
-            .collect(Collectors.toList())
+        if (groupMap.containsKey(group)) getWorldGroupByName(group)?.addWorld(world) else groupMap[group] =
+            WorldGroup(world)
     }
 
     /**
@@ -575,6 +553,16 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
 
 
     //Getters and setters
+    /**
+     * 获取地图别名
+     *
+     * @param worldName 世界名
+     * @return String 别名
+     */
+    override fun getWorldAlias(worldName: String): String {
+        return dynamicWorld.getMVWorld(worldName)!!.alias
+    }
+
     /**
      * 设置全局物理规则状态。
      *

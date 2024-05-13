@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * 地图管理代理，负责处理与LuckPerms权限插件的交互、管理世界及其权限组等功能。
- * @author CHuNan, Hanamizu
+ * @author CHuNan, Hanamizu, gaye
  */
 interface MapAgent {
     enum class MapGroup {
@@ -24,7 +24,7 @@ interface MapAgent {
      * @param owner 世界拥有者的玩家名。
      * @param group 权限组名称。
      */
-    fun newWorld(world: String, owner: String, group: String)
+    fun newWorld(world: String, owner: String, group: String): CompletableFuture<Void>
 
     /**
      * 删除一个世界及其相关的权限信息。
@@ -52,7 +52,7 @@ interface MapAgent {
      * @param player 玩家名称
      * @return 移除结果，移除成功返回true，失败返回false
      */
-    fun removePlayer(world: String, group: Int, player: String): Boolean
+    fun removePlayer(world: String, group: MapGroup, player: String): Boolean
 
     /**
      * 将指定世界设置为公开状态。
@@ -88,11 +88,12 @@ interface MapAgent {
     fun getPlayers(worldName: String, group: MapGroup): CompletableFuture<MutableSet<String>>
 
     /**
-     * 获取玩家可以进入的所有世界。
-     * @param name 玩家名。
-     * @return 玩家可进入的所有世界。
+     * 获取地图别名
+     *
+     * @param worldName 世界名
+     * @return String 别名
      */
-    fun getAccessWorlds(name: String): List<String>
+    fun getWorldAlias(worldName: String): String
 
     /**
      * 设置全局物理/方块更新规则状态。

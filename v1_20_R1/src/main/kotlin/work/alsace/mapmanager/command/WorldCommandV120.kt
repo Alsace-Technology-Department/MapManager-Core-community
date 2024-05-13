@@ -208,7 +208,7 @@ class WorldCommandV120(plugin: MapManager) : TabExecutor {
                 } else if (args[1].equals("remove", ignoreCase = true)) {
                     if (mapAgent.removePlayer(
                             sender.world.name,
-                            0,
+                            MapAgent.MapGroup.ADMIN,
                             args[2]
                         )
                     ) {
@@ -274,7 +274,7 @@ class WorldCommandV120(plugin: MapManager) : TabExecutor {
                 } else if (args[1].equals("remove", ignoreCase = true)) {
                     if (mapAgent.removePlayer(
                             sender.world.name,
-                            1,
+                            MapAgent.MapGroup.BUILDER,
                             args[2]
                         )
                     ) {
@@ -342,7 +342,7 @@ class WorldCommandV120(plugin: MapManager) : TabExecutor {
                 } else if (args[1].equals("remove", ignoreCase = true)) {
                     if (mapAgent.removePlayer(
                             sender.world.name,
-                            2,
+                            MapAgent.MapGroup.VISITOR,
                             args[2]
                         )
                     ) sender.sendMessage("§a玩家" + args[2] + "将不能参观你的地图了") else sender.sendMessage("§c权限修改时出现错误，请联系管理员以修复该错误")

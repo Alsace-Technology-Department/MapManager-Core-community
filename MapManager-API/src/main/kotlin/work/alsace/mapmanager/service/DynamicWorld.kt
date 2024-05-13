@@ -3,6 +3,7 @@ package work.alsace.mapmanager.service
 import com.onarandombox.MultiverseCore.api.MVWorldManager
 import com.onarandombox.MultiverseCore.api.MultiverseWorld
 import org.bukkit.Location
+import work.alsace.mapmanager.enums.MMWorldType
 
 /**
  * 动态世界管理器，提供世界的加载、卸载和管理功能。
@@ -99,6 +100,13 @@ interface DynamicWorld {
     fun getOwnerWorlds(player: String): List<String>
 
     /**
+     * 获取玩家可以进入的所有世界。
+     * @param name 玩家名。
+     * @return 玩家可进入的所有世界。
+     */
+    fun getAccessWorlds(name: String): List<String>
+
+    /**
      * 获取与给定名称精确匹配的MultiverseWorld实例。
      * @param name 世界的名称。
      * @return 对应的MultiverseWorld实例，如果未找到则返回null。
@@ -148,5 +156,5 @@ interface DynamicWorld {
      * @param generate 世界的生成器类型。
      * @return 如果成功创建，返回true；否则返回false。
      */
-    fun createWorld(name: String, alias: String, color: String, generate: String): Boolean
+    fun createWorld(name: String, alias: String, color: String, generate: MMWorldType): Boolean
 }

@@ -3,11 +3,14 @@ package work.alsace.mapmanager.common.function
 import com.onarandombox.MultiverseCore.MultiverseCore
 import com.onarandombox.MultiverseCore.api.MVWorldManager
 import com.onarandombox.MultiverseCore.api.MultiverseWorld
+import net.luckperms.api.node.Node
 import net.luckperms.api.node.NodeType
 import net.luckperms.api.node.types.PermissionNode
+import net.luckperms.api.query.QueryOptions
 import org.bukkit.*
 import org.bukkit.scheduler.BukkitRunnable
 import work.alsace.mapmanager.MapManagerImpl
+import work.alsace.mapmanager.enums.MMWorldType
 import work.alsace.mapmanager.service.DynamicWorld
 import java.io.File
 import java.util.*
@@ -192,6 +195,33 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
     }
 
     /**
+     * 获取玩家可以进入的所有世界
+     * @param name 玩家名
+     * @return 玩家可进入的所有世界列表
+     */
+    override fun getAccessWorlds(name: String): List<String> {
+        val luckPerms = plugin?.getLuckPerms()
+        val playerUuid = plugin?.getMapAgent()?.getUniqueID(name)
+        val userFuture = luckPerms?.userManager?.loadUser(
+            playerUuid!!
+        )
+        val user = userFuture?.join() ?: return emptyList()
+
+        val permissionPrefix = "multiverse.access."
+        return user.resolveInheritedNodes(QueryOptions.nonContextual())
+            .stream()
+            .filter { node: Node -> node is PermissionNode }
+            .map { obj: Node -> obj.key }
+            .filter { key: String -> key.startsWith(permissionPrefix) }
+            .map { key: String ->
+                key.substring(
+                    permissionPrefix.length
+                )
+            }
+            .collect(Collectors.toList())
+    }
+
+    /**
      * 获取与给定名称精确匹配的MultiverseWorld实例。
      * @param name 世界的名称。
      * @return 对应的MultiverseWorld实例，如果未找到则返回null。
@@ -279,14 +309,14 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
      * @param generate 世界的生成器类型。
      * @return 如果成功创建，返回true；否则返回false。
      */
-    override fun createWorld(name: String, alias: String, color: String, generate: String): Boolean {
+    override fun createWorld(name: String, alias: String, color: String, generate: MMWorldType): Boolean {
         val file = File(plugin?.server?.worldContainer, name)
         if (file.exists()) {
             plugin?.logger?.warning("§c世界" + name + "已经存在")
             return false
         }
-        when (generate.lowercase(Locale.getDefault())) {
-            "void_gen" -> {
+        when (generate) {
+            MMWorldType.VOID -> {
                 if (!mv!!.addWorld(
                         name,
                         World.Environment.NORMAL,
@@ -299,7 +329,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
                 ) return false
             }
 
-            "normal" -> {
+            MMWorldType.NORMAL -> {
                 if (!mv!!.addWorld(
                         name,
                         World.Environment.NORMAL,
@@ -312,7 +342,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
                 ) return false
             }
 
-            "nether" -> {
+            MMWorldType.NETHER -> {
                 if (!mv!!.addWorld(
                         name,
                         World.Environment.NETHER,
@@ -325,7 +355,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
                 ) return false
             }
 
-            "the_end" -> {
+            MMWorldType.END -> {
                 if (!mv!!.addWorld(
                         name,
                         World.Environment.THE_END,
