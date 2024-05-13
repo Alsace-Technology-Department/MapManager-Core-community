@@ -1,0 +1,55 @@
+name: Generate Dokka Javadoc
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  build-javadoc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'adopt'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Generate Dokka Javadoc
+        run: ./gradlew dokkaJavadoc
+
+      - name: Archive Dokka Javadoc
+        uses: actions/upload-artifact@v3
+        with:
+          name: dokka-javadoc
+          path: build/dokka/javadoc  # 根据你的 dokka 配置中的输出路径修改此处
+
+      - name: 安装腾讯云依赖
+        run: |
+          sudo pip install coscmd
+          sudo pip install tccli
+
+      - name: 配置腾讯云依赖
+        env:
+          SECRET_ID: ${{ secrets.TCLOUD_API_ID }}
+          SECRET_KEY: ${{ secrets.TCLOUD_API_KEY }}
+          BUCKET: webapp-1318358151
+          REGION: ap-shanghai
+        run: |
+          coscmd config -a $SECRET_ID -s $SECRET_KEY -b $BUCKET -r $REGION
+          tccli configure set secretId $SECRET_ID
+          tccli configure set secretKey $SECRET_KEY
+          tccli configure set region $REGION
+
+      - name: 上传到腾讯云COS并刷新CDN
+        run: |
+          coscmd upload -rfs --delete ./build/dokka/javadoc /javadoc
+          tccli cdn PurgePathCache --cli-unfold-argument --Paths https://www.alsace.team/javadoc/ --FlushType flush
+

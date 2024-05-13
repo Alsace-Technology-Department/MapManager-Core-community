@@ -12,7 +12,7 @@ plugins {
 
 description = "A map manager plugin for Minecraft."
 group = "work.alsace.mapmanager"
-version = "3.0"
+version = "3.1"
 
 dependencies {
     implementation(kotlin("stdlib"))
