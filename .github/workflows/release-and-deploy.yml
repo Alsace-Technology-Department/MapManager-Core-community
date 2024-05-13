@@ -1,4 +1,4 @@
-name: Create MapManager-Core
+name: release-and-deploy
 
 on:
   release:
