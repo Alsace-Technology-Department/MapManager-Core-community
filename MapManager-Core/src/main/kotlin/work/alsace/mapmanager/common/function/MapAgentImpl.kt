@@ -57,12 +57,12 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
         groupMap = groupIO.load()
         yaml = plugin.getMainYaml()
         config = yaml.load()
-        val global = config.getGlobal()
+        val global = config.global
         if (global != null) {
-            physical = global.getPhysical()
+            physical = global.physical
         }
         if (global != null) {
-            exploded = global.getExploded()
+            exploded = global.exploded
         }
     }
 
@@ -227,10 +227,10 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
             }
         nodeMap.remove(world)
         groupNode?.removeWorld(world)
-        val group = worldNode?.getGroup()?.let { gm.getGroup(it) }
+        val group = worldNode?.group?.let { gm.getGroup(it) }
         if (group == null || group.name == "__nil") {
             if (worldNode != null) {
-                plugin.logger.info("§c权限组" + worldNode.getGroup() + "未找到")
+                plugin.logger.info("§c权限组" + worldNode.group + "未找到")
             }
             nodeIO?.save(nodeMap)
             groupIO?.save(groupMap)
@@ -262,7 +262,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
                 }?.thenRun {
                     gm.deleteGroup(group)
                 }
-            groupMap.remove(worldNode.getGroup())
+            groupMap.remove(worldNode.group)
         }
         nodeIO?.save(nodeMap)
         groupIO?.save(groupMap)
@@ -530,57 +530,84 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @param sender 命令发送者，用于回显操作结果。
      */
     override fun syncWithLuckPerms(sender: CommandSender) {
-        val nodeMapBackup = ConcurrentHashMap(nodeMap)
-        val groupMapBackup = ConcurrentHashMap(groupMap)
+        val nodeMapBackup: ConcurrentMap<String, WorldNode?> = ConcurrentHashMap(nodeMap)
+        val groupMapBackup: ConcurrentMap<String, WorldGroup?> = ConcurrentHashMap(groupMap)
 
         plugin.logger.info("§e正在与LuckPerms同步数据...")
         sender.sendMessage("§e正在与LuckPerms同步数据...")
         groupMap.clear()
 
-        val tasks = mutableListOf<CompletableFuture<*>>()
-
         plugin.logger.info("§e开始同步参观人员数据")
-        nodeMap.keys.forEach { worldName ->
-            val visitorTask = getPlayers(worldName!!, MapGroup.VISITOR).thenAccept { players ->
-                nodeMap[worldName]?.setVisitors(players)
+        val visitorTask = CompletableFuture.runAsync {
+            plugin.logger.info("§e开始同步参观人员数据")
+        }
+        for ((key, value) in nodeMap) {
+            value?.let { putWorldGroup(it.group, key!!) }
+            visitorTask.thenRun {
+                getPlayers(
+                    key!!,
+                    MapGroup.VISITOR
+                ).thenAccept { players ->
+                    value?.visitors = players
+                }.join()
             }
-            visitorTask?.let { tasks.add(it) }
+        }
+        visitorTask.whenComplete { _: Void, _: Throwable ->
+            plugin.logger.info("§a参观人员数据同步完成")
         }
 
-        plugin.logger.info("§e开始同步管理员和建筑人员数据")
-        groupMap.keys.forEach { worldName ->
-            val adminTask = getPlayers(worldName!!, MapGroup.ADMIN).thenAccept { players ->
-                groupMap[worldName]?.setAdmins(players)
+        var adminTask = CompletableFuture.runAsync {
+            plugin.logger.info("§e开始同步管理员数据")
+        }
+        var builderTask = CompletableFuture.runAsync {
+            plugin.logger.info("§e开始同步建筑人员数据")
+        }
+        for ((key, value) in groupMap) {
+            adminTask = adminTask.thenRun {
+                getPlayers(
+                    key!!,
+                    MapGroup.ADMIN
+                ).thenAccept { players ->
+                    value?.admins = players
+                }.join()
             }
-            adminTask?.let { tasks.add(it) }
-
-            val builderTask = getPlayers(worldName, MapGroup.BUILDER).thenAccept { players ->
-                groupMap[worldName]?.setBuilders(players)
+            builderTask = builderTask.thenRun {
+                getPlayers(
+                    key!!,
+                    MapGroup.BUILDER
+                ).thenAccept { players ->
+                    value?.builders = players
+                }.join()
             }
-            builderTask?.let { tasks.add(it) }
+        }
+        adminTask.whenComplete { _: Void, _: Throwable ->
+            plugin.logger.info("§a管理员数据同步完成")
+        }
+        builderTask.whenComplete { _: Void, _: Throwable ->
+            plugin.logger.info("§a建筑人员数据同步完成")
         }
 
-        CompletableFuture.allOf(*tasks.toTypedArray()).whenComplete { _, error ->
-            if (error != null) {
-                plugin.logger.warning("§c数据同步时出现错误，同步中止")
-                sender.sendMessage("§c数据同步时出现错误，同步中止")
-                error.printStackTrace()
-
-                // Restore from backup in case of error
+        CompletableFuture.allOf(adminTask, builderTask, visitorTask).whenComplete { _: Void?, e: Throwable? ->
+            if (e != null) {
                 nodeMap = nodeMapBackup
                 groupMap = groupMapBackup
-            } else {
-                plugin.logger.info("§a所有数据均已同步完成")
-                plugin.logger.info("§e数据保存中...")
-                save()
-                plugin.logger.info("§a数据保存完成")
-                sender.sendMessage("§a数据同步完成")
+                plugin.logger.info("§c数据同步时出现错误，同步中止")
+                sender.sendMessage("§c数据同步时出现错误，同步中止")
+                e.printStackTrace()
+                return@whenComplete
             }
-        }.exceptionally { e ->
+            plugin.logger.info("§a所有数据均已同步完成")
+            plugin.logger.info("§e数据保存中...")
+            nodeMapBackup.clear()
+            groupMapBackup.clear()
+            save()
+            plugin.logger.info("§a数据保存完成")
+            sender.sendMessage("§a数据同步完成")
+        }.exceptionally { e: Throwable ->
             nodeMap = nodeMapBackup
             groupMap = groupMapBackup
-            plugin.logger.warning("§c数据同步异常中止")
-            sender.sendMessage("§c数据同步异常中止")
+            plugin.logger.info("§c数据同步时出现错误，同步中止")
+            sender.sendMessage("§c数据同步时出现错误，同步中止")
             e.printStackTrace()
             null
         }
@@ -643,7 +670,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @param physical 新的物理规则状态。
      */
     override fun setPhysical(world: String, physical: Boolean) {
-        getWorldNode(world)?.setPhysical(physical)
+        getWorldNode(world)?.physical = physical
     }
 
     /**
@@ -653,7 +680,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 指定世界的物理规则状态。
      */
     override fun isPhysical(world: String): Boolean {
-        return physical ?: (getWorldNode(world)?.isPhysical() == true)
+        return getWorldNode(world)?.physical == true
     }
 
     /**
@@ -674,7 +701,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @param exploded 新的爆炸破坏状态。
      */
     override fun setExploded(world: String, exploded: Boolean) {
-        getWorldNode(world)?.setExploded(exploded)
+        getWorldNode(world)?.exploded = exploded
     }
 
     /**
@@ -684,7 +711,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 指定世界的爆炸破坏状态。
      */
     override fun isExploded(world: String): Boolean {
-        return exploded ?: (getWorldNode(world)?.isExploded() == true)
+        return getWorldNode(world)?.exploded == true
     }
 
     /**
@@ -694,7 +721,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 权限组名称，如果世界未指定权限组，则返回null。
      */
     override fun getWorldGroupName(world: String): String? {
-        return nodeMap.getOrDefault(world, nullWorldNode)?.getGroup()
+        return nodeMap.getOrDefault(world, nullWorldNode)?.group
     }
 
     /**
@@ -704,7 +731,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 世界列表，若权限组下无世界，则返回null。
      */
     override fun getWorldListByGroup(group: String): List<String>? {
-        return groupMap.getOrDefault(group, nullWorldGroup)!!.getWorlds().stream().toList()
+        return groupMap.getOrDefault(group, nullWorldGroup)!!.worlds.stream().toList()
     }
 
     /**
@@ -714,7 +741,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 该世界的管理员用户名集合。
      */
     override fun getAdminSet(world: World): MutableSet<String>? {
-        return getWorldGroup(world.name)?.getAdmins()
+        return getWorldGroup(world.name)?.admins
     }
 
     /**
@@ -724,7 +751,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 该世界的建筑师用户名集合。
      */
     override fun getBuilderSet(world: World): MutableSet<String>? {
-        return getWorldGroup(world.name)?.getBuilders()
+        return getWorldGroup(world.name)?.builders
     }
 
     /**
@@ -734,7 +761,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 该世界的访客用户名集合。
      */
     override fun getVisitorSet(world: World): MutableSet<String>? {
-        return getWorldNode(world.name)?.getVisitors()
+        return getWorldNode(world.name)?.visitors
     }
 
     private fun addAdmin(world: String, player: String): Boolean {

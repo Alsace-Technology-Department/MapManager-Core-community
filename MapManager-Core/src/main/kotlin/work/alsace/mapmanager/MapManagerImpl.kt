@@ -28,7 +28,6 @@ class MapManagerImpl : JavaPlugin(), MapManager {
     private var luckPerms: LuckPerms? = null
     private var yaml: MainYaml? = null
     override fun onEnable() {
-        instance = this
         server.consoleSender.sendMessage("[§6MapManager§7] §f启动中...")
 
         logger.info("正在加载配置...")
@@ -55,6 +54,7 @@ class MapManagerImpl : JavaPlugin(), MapManager {
         server.pluginManager.registerEvents(BlockListener(this), this)
         server.pluginManager.registerEvents(PlayerListener(this), this)
         server.consoleSender.sendMessage("[§6MapManager§7] §f加载成功！")
+        instance = this
     }
 
     override fun onDisable() {
@@ -62,7 +62,7 @@ class MapManagerImpl : JavaPlugin(), MapManager {
         server.consoleSender.sendMessage("[§6MapManager§7] §f已卸载")
     }
 
-    private fun registerCommand(cmd: String, executor: CommandExecutor) {
+    fun registerCommand(cmd: String, executor: CommandExecutor) {
         cmd.let { getCommand(it)?.setExecutor(executor) }
     }
 
