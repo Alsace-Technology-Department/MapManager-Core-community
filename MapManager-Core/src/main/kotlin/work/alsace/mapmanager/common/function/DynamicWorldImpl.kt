@@ -1,6 +1,5 @@
 package work.alsace.mapmanager.common.function
 
-import com.onarandombox.MultiverseCore.MultiverseCore
 import com.onarandombox.MultiverseCore.api.MVWorldManager
 import com.onarandombox.MultiverseCore.api.MultiverseWorld
 import net.luckperms.api.model.user.User
@@ -13,12 +12,12 @@ import java.io.File
 import java.util.*
 import java.util.stream.Collectors
 
+
 /**
  * 动态世界管理器，提供世界的加载、卸载和管理功能。
  */
-class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
-    private val mv =
-        (Bukkit.getServer().pluginManager.getPlugin("Multiverse-Core") as MultiverseCore?)?.mvWorldManager
+class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
+    private val mv = plugin.multiverseCore?.mvWorldManager
     private val tasks: MutableMap<String?, BukkitRunnable?> = HashMap()
     private val loaded: MutableSet<String?> = HashSet()
 
@@ -64,7 +63,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
     override fun loadWorld(name: String): Boolean {
         if (!mv?.loadWorld(name)!!) return false
         loaded.add(name)
-        plugin?.logger?.info(name + "已加载")
+        plugin.logger.info(name + "已加载")
         return true
     }
 
@@ -74,16 +73,16 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
      */
     override fun unloadWorldLater(name: String) {
         if (!loaded.contains(name)) return
-        plugin?.logger?.info(name + "准备卸载")
+        plugin.logger.info(name + "准备卸载")
         val runnable: BukkitRunnable = object : BukkitRunnable() {
             override fun run() {
                 if (name.let { Bukkit.getWorld(it)?.players?.size }!! <= 0) mv?.unloadWorld(name, true)
                 loaded.remove(name)
                 tasks.remove(name)
-                plugin?.logger?.info(name + "已卸载")
+                plugin.logger.info(name + "已卸载")
             }
         }
-        plugin?.let { runnable.runTaskLater(it, 12000) }
+        plugin.let { runnable.runTaskLater(it, 12000) }
         tasks[name] = runnable
     }
 
@@ -145,7 +144,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
     override fun cancelUnloadTask(name: String) {
         if (tasks.containsKey(name)) {
             tasks[name]?.cancel()
-            if (tasks.remove(name) != null) plugin?.logger?.warning(name + "已取消卸载")
+            if (tasks.remove(name) != null) plugin.logger.warning(name + "已取消卸载")
         }
     }
 
@@ -173,7 +172,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
      * @return 玩家管理的所有世界名称列表。
      */
     override fun getOwnerWorlds(player: String): List<String> {
-        val luckPerms = plugin!!.getLuckPerms()
+        val luckPerms = plugin.getLuckPerms()
         val playerUuid = plugin.getMapAgent().getUniqueID(player)
         plugin.logger.info(playerUuid.toString())
         val userFuture = luckPerms.userManager.loadUser(playerUuid!!)
@@ -206,12 +205,12 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
      * @return 玩家可进入的所有世界列表
      */
     override fun getAccessWorlds(name: String): List<String> {
-        val luckPerms = plugin?.getLuckPerms()
-        val playerUuid = plugin?.getMapAgent()?.getUniqueID(name)
-        val userFuture = luckPerms?.userManager?.loadUser(
+        val luckPerms = plugin.getLuckPerms()
+        val playerUuid = plugin.getMapAgent().getUniqueID(name)
+        val userFuture = luckPerms.userManager.loadUser(
             playerUuid!!
         )
-        val user = userFuture?.join() ?: return emptyList()
+        val user = userFuture.join() ?: return emptyList()
 
         return getWorlds("").stream()
             .filter { world: String ->
@@ -277,12 +276,12 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
      * @return 如果成功导入，返回true；否则返回false。
      */
     override fun importWorld(name: String, alias: String, color: String): Boolean {
-        val file = File(plugin?.server?.worldContainer, name)
+        val file = File(plugin.server.worldContainer, name)
         if (!file.exists()) {
-            plugin?.logger?.warning("§c未找到世界文件$name")
+            plugin.logger.warning("§c未找到世界文件$name")
             return false
         }
-        val versionCheck = VersionCheck(plugin!!)
+        val versionCheck = VersionCheck(plugin)
         if (!versionCheck.isMapVersionCorrect(name)) {
             plugin.logger.info("地图版本过高")
             return false
@@ -312,9 +311,9 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
      * @return 如果成功创建，返回true；否则返回false。
      */
     override fun createWorld(name: String, alias: String, color: String, generate: MMWorldType): Boolean {
-        val file = File(plugin?.server?.worldContainer, name)
+        val file = File(plugin.server.worldContainer, name)
         if (file.exists()) {
-            plugin?.logger?.warning("§c世界" + name + "已经存在")
+            plugin.logger.warning("§c世界" + name + "已经存在")
             return false
         }
         when (generate) {
@@ -385,7 +384,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl?) : DynamicWorld {
         }
         val world = getMVWorld(name)
         if (world == null) {
-            plugin?.logger?.warning("§c获取" + name + "信息失败")
+            plugin.logger.warning("§c获取" + name + "信息失败")
             return false
         }
         initWorld(world, alias, color)

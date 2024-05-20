@@ -1,8 +1,6 @@
 package work.alsace.mapmanager.common.function
 
 import com.onarandombox.MultiverseCore.utils.WorldNameChecker
-import net.querz.mca.Chunk
-import net.querz.mca.MCAUtil
 import net.querz.nbt.io.NBTUtil
 import net.querz.nbt.io.NamedTag
 import net.querz.nbt.tag.CompoundTag
@@ -24,7 +22,6 @@ class VersionCheck(private val plugin: MapManagerImpl) {
             return false
         }
         return WorldNameChecker.isValidWorldFolder(worldDir)
-                && areRegionFilesVersionCorrect(worldDir)
                 && isLevelFileVersionCorrect(worldDir)
     }
 
@@ -39,7 +36,6 @@ class VersionCheck(private val plugin: MapManagerImpl) {
             return false
         }
         return WorldNameChecker.isValidWorldFolder(dir)
-                && areRegionFilesVersionCorrect(dir)
                 && isLevelFileVersionCorrect(dir)
     }
 
@@ -71,58 +67,6 @@ class VersionCheck(private val plugin: MapManagerImpl) {
             e.printStackTrace()
         }
         return false
-    }
-
-    /**
-     * 检测区块文件版本是否兼容
-     * @param worldDirectory File 地图文件夹
-     * @return true为兼容，false不兼容
-     */
-    private fun areRegionFilesVersionCorrect(worldDirectory: File): Boolean {
-        val regionDir = File(worldDirectory, "region")
-        if (!regionDir.exists() || !regionDir.isDirectory) {
-            plugin.logger.info("§c未发现" + worldDirectory.name + "的区块文件目录")
-            return false
-        }
-        val regionFiles = regionDir.listFiles { _: File?, name: String ->
-            name.endsWith(
-                ".mca"
-            )
-        }
-            ?: return false
-
-        plugin.logger.info("正在遍历区块文件，请稍后...")
-        for (regionFile in regionFiles) {
-            if (!isRegionFileVersionCompatible(regionFile)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * 检测区块文件版本是否兼容
-     * @param regionFile File 区块文件
-     * @return true为兼容，false不兼容
-     */
-    private fun isRegionFileVersionCompatible(regionFile: File): Boolean {
-        try {
-            var maxDataVersion = 0
-            val mcaFile = MCAUtil.read(regionFile)
-            for (x in 0..31) {
-                for (z in 0..31) {
-                    if (mcaFile.getChunk(x, z) != null) {
-                        val chunk: Chunk = mcaFile.getChunk(x, z)
-                        if(chunk.dataVersion > maxDataVersion) maxDataVersion = chunk.dataVersion
-                    }
-                }
-            }
-            return maxDataVersion <= serverVersion
-        } catch (e: IOException) {
-            plugin.logger.warning("读取区块文件" + regionFile.name + "时发生错误")
-            e.printStackTrace()
-            return false
-        }
     }
 
     /**

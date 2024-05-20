@@ -1,7 +1,6 @@
 name: MapManager-Core
-main: work.alsace.mapmanager.MapManager
+main: work.alsace.mapmanager.MapManagerImpl
 version: ${version}
-#description: '地图管理核心插件-社区版'
 depend:
   - LuckPerms
   - Multiverse-Core

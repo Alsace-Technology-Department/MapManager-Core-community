@@ -47,7 +47,6 @@ interface MapManager {
      */
     fun setMainYaml(yaml: MainYaml)
 
-
     /**
      * 获取MapManager实例
      * @return MapManager实例
