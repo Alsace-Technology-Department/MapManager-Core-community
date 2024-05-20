@@ -18,9 +18,9 @@ import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 import work.alsace.mapmanager.MapManager
 import work.alsace.mapmanager.command.WorldCommandV116.Operation.*
+import work.alsace.mapmanager.enums.MapGroup
 import work.alsace.mapmanager.service.DynamicWorld
 import work.alsace.mapmanager.service.MapAgent
-import work.alsace.mapmanager.service.MapAgent.MapGroup
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutionException

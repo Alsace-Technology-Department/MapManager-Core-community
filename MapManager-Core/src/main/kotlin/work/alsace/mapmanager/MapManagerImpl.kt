@@ -1,7 +1,7 @@
 package work.alsace.mapmanager
 
+import com.onarandombox.MultiverseCore.MultiverseCore
 import net.luckperms.api.LuckPerms
-import net.luckperms.api.model.group.Group
 import net.luckperms.api.node.types.InheritanceNode
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.Logger
@@ -10,10 +10,10 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.TabExecutor
 import org.bukkit.plugin.java.JavaPlugin
 import work.alsace.mapmanager.common.command.*
-import work.alsace.mapmanager.common.version.VersionBridge
 import work.alsace.mapmanager.common.listener.BlockListener
 import work.alsace.mapmanager.common.listener.PlayerListener
 import work.alsace.mapmanager.common.log.Log4JFilter
+import work.alsace.mapmanager.common.version.VersionBridge
 import work.alsace.mapmanager.service.DynamicWorld
 import work.alsace.mapmanager.service.MainYaml
 import work.alsace.mapmanager.service.MapAgent
@@ -27,6 +27,7 @@ class MapManagerImpl : JavaPlugin(), MapManager {
     private var mapAgent: MapAgent? = null
     private var luckPerms: LuckPerms? = null
     private var yaml: MainYaml? = null
+    var multiverseCore: MultiverseCore? = null
     override fun onEnable() {
         server.consoleSender.sendMessage("[§6MapManager§7] §f启动中...")
 
@@ -39,7 +40,8 @@ class MapManagerImpl : JavaPlugin(), MapManager {
 
         logger.info("正在获取LuckPerms API...")
         (LogManager.getRootLogger() as Logger).addFilter(Log4JFilter())
-        this.luckPerms = Bukkit.getServicesManager().getRegistration(LuckPerms::class.java)?.provider
+        luckPerms = Bukkit.getServicesManager().getRegistration(LuckPerms::class.java)?.provider
+        multiverseCore = Bukkit.getServer().pluginManager.getPlugin("Multiverse-Core") as MultiverseCore?
         initPermission()
 
         VersionBridge().serverVersionChecks(this)
@@ -128,21 +130,18 @@ class MapManagerImpl : JavaPlugin(), MapManager {
         }
         val groups = listOf("apply", "public", "worldbase")
         groups.forEach { groupName ->
-            manager.loadGroup(groupName).thenAcceptAsync { optionalGroup: Optional<Group> ->
+            manager.loadGroup(groupName).thenAcceptAsync { optionalGroup ->
                 if (!optionalGroup.isPresent) {
-                    manager.createAndLoadGroup(groupName).thenAccept { newGroup: Group? ->
-                        if (newGroup != null) {
-                            val data = newGroup.data()
+                    manager.createAndLoadGroup(groupName).thenAccept { newGroup ->
+                        newGroup?.let {
+                            val data = it.data()
                             data.add(InheritanceNode.builder("default").build())
-                            manager.saveGroup(newGroup).thenRun {
-                                logger.info("权限组 ${newGroup.name} 已创建并初始化完毕")
+                            manager.saveGroup(it).thenRun {
+                                logger.info("权限组 ${it.name} 已创建并初始化完毕")
                             }
-                        } else {
-                            logger.warning("无法创建权限组 $groupName")
-                        }
+                        } ?: logger.warning("无法创建权限组 $groupName")
                     }
                 } else {
-                    // 权限组已存在
                     logger.info("权限组 $groupName 已存在，无需创建")
                 }
             }.exceptionally { throwable ->

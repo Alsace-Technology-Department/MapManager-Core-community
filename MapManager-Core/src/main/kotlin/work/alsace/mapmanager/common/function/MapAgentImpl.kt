@@ -17,13 +17,13 @@ import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import work.alsace.mapmanager.MapManagerImpl
+import work.alsace.mapmanager.enums.MapGroup
 import work.alsace.mapmanager.pojo.MainConfig
 import work.alsace.mapmanager.pojo.WorldGroup
 import work.alsace.mapmanager.pojo.WorldNode
 import work.alsace.mapmanager.service.DynamicWorld
 import work.alsace.mapmanager.service.MainYaml
 import work.alsace.mapmanager.service.MapAgent
-import work.alsace.mapmanager.service.MapAgent.MapGroup
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap

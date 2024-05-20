@@ -5,6 +5,7 @@ import org.bukkit.ChatColor
 import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import work.alsace.mapmanager.enums.MapGroup
 import work.alsace.mapmanager.pojo.WorldGroup
 import work.alsace.mapmanager.pojo.WorldNode
 import java.util.*
@@ -15,10 +16,6 @@ import java.util.concurrent.CompletableFuture
  * @author CHuNan, Hanamizu, gaye
  */
 interface MapAgent {
-    enum class MapGroup {
-        ADMIN, BUILDER, VISITOR
-    }
-
     /**
      * 创建一个新的世界，并将其注册到权限管理中。
      *
