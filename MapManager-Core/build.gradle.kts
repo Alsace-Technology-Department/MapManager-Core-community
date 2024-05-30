@@ -10,12 +10,13 @@ plugins {
 }
 
 group = "work.alsace.mapmanager"
-version = "3.1.1"
+version = "3.2"
 
 dependencies {
     implementation(project(":MapManager-API"))
     implementation(project(":v1_16_R1"))
     implementation(project(":v1_20_R1"))
+    implementation(project(":v1_20_6_R1"))
 
     implementation("net.kyori:adventure-api:4.14.0")
     implementation("org.apache.logging.log4j:log4j-core:2.17.1")
@@ -40,6 +41,6 @@ tasks.shadowJar {
 
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
