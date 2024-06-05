@@ -281,7 +281,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
             plugin.logger.warning("§c未找到世界文件$name")
             return false
         }
-        val versionCheck = VersionCheck(plugin)
+        val versionCheck = VersionCheckImpl(plugin)
         if (!versionCheck.isMapVersionCorrect(name)) {
             plugin.logger.info("地图版本过高")
             return false

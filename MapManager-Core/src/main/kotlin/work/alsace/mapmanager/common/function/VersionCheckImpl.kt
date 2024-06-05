@@ -5,17 +5,17 @@ import net.querz.nbt.io.NBTUtil
 import net.querz.nbt.io.NamedTag
 import net.querz.nbt.tag.CompoundTag
 import work.alsace.mapmanager.MapManagerImpl
+import work.alsace.mapmanager.service.VersionCheck
 import java.io.File
 import java.io.IOException
 
-
-class VersionCheck(private val plugin: MapManagerImpl) {
+class VersionCheckImpl(private val plugin: MapManagerImpl) : VersionCheck {
     /**
      * 检测主目录下地图文件版本是否合法
      * @param world String 地图名
      * @return true为合法，false不合法
      */
-    fun isMapVersionCorrect(world: String): Boolean {
+    override fun isMapVersionCorrect(world: String): Boolean {
         val worldDir = File(plugin.server.worldContainer, world)
         if (!WorldNameChecker.isValidWorldFolder(worldDir)) {
             plugin.logger.info("§c未发现" + world + "中的.dat文件")
@@ -30,7 +30,7 @@ class VersionCheck(private val plugin: MapManagerImpl) {
      * @param dir File 地图文件夹
      * @return true为合法，false不合法
      */
-    fun isMapVersionCorrect(dir: File): Boolean {
+    override fun isMapVersionCorrect(dir: File): Boolean {
         if (!WorldNameChecker.isValidWorldFolder(dir)) {
             plugin.logger.info("§c未发现" + dir + "中的.dat文件")
             return false
@@ -74,6 +74,6 @@ class VersionCheck(private val plugin: MapManagerImpl) {
      * @return 服务器版本
      */
     @Suppress("DEPRECATION")
-    private val serverVersion: Int
+    override val serverVersion: Int
         get() = plugin.server.unsafe.dataVersion
 }

@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "work.alsace.mapmanager"
-version = "3.2"
+version = "3.1.2"
 
 dependencies {
     implementation(project(":MapManager-API"))
@@ -23,7 +23,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
     implementation("com.github.Querz:NBT:6.1")
 
-    compileOnly("com.onarandombox.multiversecore:Multiverse-Core:4.3.1")
+    compileOnly("com.onarandombox.multiversecore:Multiverse-Core:4.3.0")
     compileOnly("net.luckperms:api:5.3")
     compileOnly("com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT")
 }
