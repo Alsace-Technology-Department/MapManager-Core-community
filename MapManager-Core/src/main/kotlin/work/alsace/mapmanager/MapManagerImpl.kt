@@ -10,6 +10,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.TabExecutor
 import org.bukkit.plugin.java.JavaPlugin
 import work.alsace.mapmanager.common.command.*
+import work.alsace.mapmanager.common.function.VersionCheckImpl
 import work.alsace.mapmanager.common.listener.BlockListener
 import work.alsace.mapmanager.common.listener.PlayerListener
 import work.alsace.mapmanager.common.log.Log4JFilter
@@ -17,6 +18,7 @@ import work.alsace.mapmanager.common.version.VersionBridge
 import work.alsace.mapmanager.service.DynamicWorld
 import work.alsace.mapmanager.service.MainYaml
 import work.alsace.mapmanager.service.MapAgent
+import work.alsace.mapmanager.service.VersionCheck
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -27,6 +29,7 @@ class MapManagerImpl : JavaPlugin(), MapManager {
     private var mapAgent: MapAgent? = null
     private var luckPerms: LuckPerms? = null
     private var yaml: MainYaml? = null
+    private var versionCheck: VersionCheck? = null
     var multiverseCore: MultiverseCore? = null
     override fun onEnable() {
         server.consoleSender.sendMessage("[§6MapManager§7] §f启动中...")
@@ -53,6 +56,7 @@ class MapManagerImpl : JavaPlugin(), MapManager {
         registerCommand("write", WriteCommand(this))
         registerCommand("worldtp", WorldTPCommand(this))
         registerCommand("create", CreateCommand(this))
+        setVersionCheck(VersionCheckImpl(this))
         server.pluginManager.registerEvents(BlockListener(this), this)
         server.pluginManager.registerEvents(PlayerListener(this), this)
         server.consoleSender.sendMessage("[§6MapManager§7] §f加载成功！")
@@ -99,6 +103,14 @@ class MapManagerImpl : JavaPlugin(), MapManager {
 
     override fun setMainYaml(yaml: MainYaml) {
         this.yaml = yaml
+    }
+
+    override fun getVersionCheck(): VersionCheck {
+        return versionCheck!!
+    }
+
+    override fun setVersionCheck(versionCheck: VersionCheck) {
+        this.versionCheck = versionCheck
     }
 
     @Throws(IOException::class)
