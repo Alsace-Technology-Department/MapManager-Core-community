@@ -4,6 +4,7 @@ import net.luckperms.api.LuckPerms
 import work.alsace.mapmanager.service.DynamicWorld
 import work.alsace.mapmanager.service.MainYaml
 import work.alsace.mapmanager.service.MapAgent
+import work.alsace.mapmanager.service.VersionCheck
 
 interface MapManager {
     /**
@@ -46,6 +47,17 @@ interface MapManager {
      * @param yaml MainYaml实例
      */
     fun setMainYaml(yaml: MainYaml)
+
+    /**
+     * 获取VersionCheck实例
+     */
+    fun getVersionCheck(): VersionCheck
+
+    /**
+     * 设置VersionCheck实例
+     * @param versionCheck VersionCheck实例
+     */
+    fun setVersionCheck(versionCheck: VersionCheck)
 
     /**
      * 获取MapManager实例

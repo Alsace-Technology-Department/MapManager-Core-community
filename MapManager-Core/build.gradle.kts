@@ -10,19 +10,20 @@ plugins {
 }
 
 group = "work.alsace.mapmanager"
-version = "3.2-SNAPSHOT"
+version = "3.1.3"
 
 dependencies {
     implementation(project(":MapManager-API"))
     implementation(project(":v1_16_R1"))
     implementation(project(":v1_20_R1"))
+    implementation(project(":v1_20_6_R1"))
 
     implementation("net.kyori:adventure-api:4.14.0")
     implementation("org.apache.logging.log4j:log4j-core:2.17.1")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
     implementation("com.github.Querz:NBT:6.1")
 
-    compileOnly("com.onarandombox.multiversecore:Multiverse-Core:4.3.1")
+    compileOnly("com.onarandombox.multiversecore:Multiverse-Core:4.3.0")
     compileOnly("net.luckperms:api:5.3")
     compileOnly("com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT")
 }
@@ -40,6 +41,6 @@ tasks.shadowJar {
 
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
