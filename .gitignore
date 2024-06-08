@@ -20,6 +20,7 @@ target/
 *.class
 /build/
 /target/
+buildSrc/build/
 
 # Run directory
 /run/

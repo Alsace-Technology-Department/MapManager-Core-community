@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "work.alsace.mapmanager"
-version = "3.1.3"
+version = "3.1.5"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -22,8 +22,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 signing {

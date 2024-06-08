@@ -3,7 +3,6 @@ package work.alsace.mapmanager.common.version
 import work.alsace.mapmanager.MapManagerImpl
 import work.alsace.mapmanager.command.WorldCommandV116
 import work.alsace.mapmanager.command.WorldCommandV120
-import work.alsace.mapmanager.command.WorldCommandV1206
 import work.alsace.mapmanager.common.function.DynamicWorldImpl
 import work.alsace.mapmanager.common.function.MapAgentImpl
 import work.alsace.mapmanager.function.MainYamlV116
@@ -26,18 +25,11 @@ class VersionBridge {
                 plugin.registerCommand("world", WorldCommandV116(plugin))
             }
 
-            version in 3465..3838 -> {
+            version >= 3465 -> {
                 plugin.setMainYaml(MainYamlV120(plugin))
                 plugin.setDynamicWorld(DynamicWorldImpl(plugin))
                 plugin.setMapAgent(MapAgentImpl(plugin))
                 plugin.registerCommand("world", WorldCommandV120(plugin))
-            }
-
-            version >= 3839 -> {
-                plugin.setMainYaml(MainYamlV120(plugin))
-                plugin.setDynamicWorld(DynamicWorldImpl(plugin))
-                plugin.setMapAgent(MapAgentImpl(plugin))
-                plugin.registerCommand("world", WorldCommandV1206(plugin))
             }
 
             else -> {

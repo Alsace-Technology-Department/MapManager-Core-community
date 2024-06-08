@@ -150,7 +150,17 @@ interface DynamicWorld {
     fun importWorld(name: String, alias: String, color: String): Boolean
 
     /**
-     * 创建一个新世界。
+     * 导入指定名称指定类型的世界。
+     * @param name 世界的名称。
+     * @param alias 世界的别名。
+     * @param color 世界名称的颜色。
+     * @param generate 世界的生成器类型。
+     * @return 如果成功导入，返回true；否则返回false。
+     */
+    fun importWorld(name: String, alias: String, color: String, generate: MMWorldType): Boolean
+
+    /**
+     * 创建一个指定类型的新世界。
      * @param name 世界的名称。
      * @param alias 世界的别名。
      * @param color 世界名称的颜色。

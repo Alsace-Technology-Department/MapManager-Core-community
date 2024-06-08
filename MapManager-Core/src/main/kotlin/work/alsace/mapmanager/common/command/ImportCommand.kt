@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 import work.alsace.mapmanager.MapManagerImpl
+import work.alsace.mapmanager.enums.MMWorldType
 import java.util.*
 import java.util.stream.Collectors
 
@@ -25,6 +26,15 @@ class ImportCommand(private val plugin: MapManagerImpl) : TabExecutor {
                     ?.map { s: String? -> "n:$s" }
                     ?.filter { s: String? -> s?.lowercase(Locale.getDefault())!!.startsWith(prefix) }
                     ?.collect(Collectors.toList())
+            }
+
+            "e:" -> {
+                val worldTypes = listOf("void_gen", "normal", "nether", "the_end", "flat")
+                val prefix = args[index].lowercase(Locale.getDefault())
+                worldTypes.stream()
+                    .map { type -> "e:$type" }
+                    .filter { type -> type.lowercase(Locale.getDefault()).startsWith(prefix) }
+                    .collect(Collectors.toList())
             }
 
             "o:" -> {
@@ -51,6 +61,7 @@ class ImportCommand(private val plugin: MapManagerImpl) : TabExecutor {
         var color = "darkaqua"
         var group: String? = null
         var owner: String? = null
+        var generate: String? = null
         for (arg in args) {
             when (arg.substring(0, 2)) {
                 "n:" -> name = arg.substring(2)
@@ -58,6 +69,7 @@ class ImportCommand(private val plugin: MapManagerImpl) : TabExecutor {
                 "c:" -> color = arg.substring(2)
                 "g:" -> group = arg.substring(2)
                 "o:" -> owner = arg.substring(2)
+                "e:" -> generate = arg.substring(2)
                 else -> {}
             }
         }
@@ -68,7 +80,14 @@ class ImportCommand(private val plugin: MapManagerImpl) : TabExecutor {
         if (owner == null) owner = sender.name
         if (alias == null) alias = name
         if (group == null) group = name
-        if (!plugin.getDynamicWorld().importWorld(name, alias, color)) {
+        val generateType: MMWorldType = when (generate) {
+            "void_gen" -> MMWorldType.VOID
+            "normal" -> MMWorldType.NORMAL
+            "nether" -> MMWorldType.NETHER
+            "the_end" -> MMWorldType.END
+            else -> MMWorldType.FLAT
+        }
+        if (!plugin.getDynamicWorld().importWorld(name, alias, color, generateType)) {
             sender.sendMessage("§c地图导入失败，请查看控制台以获取更多信息")
             return true
         }
