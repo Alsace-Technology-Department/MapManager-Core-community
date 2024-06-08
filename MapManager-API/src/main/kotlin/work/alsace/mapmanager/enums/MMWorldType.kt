@@ -1,11 +1,30 @@
 package work.alsace.mapmanager.enums
 
-enum class MMWorldType(s: String) {
-    FLAT("flat"),
-    NORMAL("normal"),
-    VOID("void_gen"),
-    NETHER("nether"),
-    END("the_end");
+enum class MMWorldType {
+    /**
+     * 平坦世界
+     */
+    FLAT,
+
+    /**
+     * 常规世界
+     */
+    NORMAL,
+
+    /**
+     * 虚空世界
+     */
+    VOID,
+
+    /**
+     * 下界
+     */
+    NETHER,
+
+    /**
+     * 末地
+     */
+    END;
 
     private val value: String? = null
 

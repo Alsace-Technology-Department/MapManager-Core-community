@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package work.alsace.mapmanager.command
 
 import net.kyori.adventure.text.Component
@@ -9,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
-import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
@@ -291,7 +288,7 @@ class WorldCommandV120(plugin: MapManager) : TabExecutor {
             }
 
             "builders" -> {
-                if (dynamicWorld.getMVWorld(sender.world.name)!!.color == ChatColor.GOLD) {
+                if (mapAgent.isPublic(sender.world.name)) {
                     sender.sendMessage("§e该地图为公共地图，所有玩家均可进入并自由建筑")
                     return false
                 }
@@ -353,12 +350,7 @@ class WorldCommandV120(plugin: MapManager) : TabExecutor {
             }
 
             "visitors" -> {
-                val color = dynamicWorld.getMVWorld(sender.world.name)?.color
-                if (color == ChatColor.GOLD) {
-                    sender.sendMessage("§a该地图为公共地图，所有玩家均可进入并自由建筑")
-                    return false
-                }
-                if (color == ChatColor.DARK_GREEN) {
+                if (mapAgent.isPublic(sender.world.name)) {
                     sender.sendMessage("§a该地图允许任何玩家进来参观")
                     return false
                 }
@@ -431,13 +423,9 @@ class WorldCommandV120(plugin: MapManager) : TabExecutor {
                     return false
                 }
                 val world = dynamicWorld.getMVWorld(sender.world.name)
-                val result = ignoreColor(args[1], world?.color)
-                if (world != null) {
-                    world.alias = result
-                }
-                if (world != null) {
-                    sender.sendMessage("§a已将世界名称修改为： " + world.color + result)
-                }
+                val result = ignoreColor(args[1], world?.color!!)
+                world.alias = result
+                sender.sendMessage("§a已将世界名称修改为： " + world.color + result)
             }
 
             "blockupdate", "physics", "physical" -> {
@@ -624,7 +612,7 @@ class WorldCommandV120(plugin: MapManager) : TabExecutor {
         return false
     }
 
-    private fun ignoreColor(string: String?, color: ChatColor?): String {
+    private fun ignoreColor(string: String?, color: Any): String {
         val hexPattern = Pattern.compile(/* regex = 十六进制颜色*/ "&([A-Fa-f0-9k-oK-O]|R|r)")
         val matcher = string?.let { hexPattern.matcher(it) }
         val builder = string?.let { StringBuilder(it.length) }

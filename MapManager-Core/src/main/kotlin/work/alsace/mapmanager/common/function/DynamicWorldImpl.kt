@@ -276,6 +276,18 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
      * @return 如果成功导入，返回true；否则返回false。
      */
     override fun importWorld(name: String, alias: String, color: String): Boolean {
+        return importWorld(name, alias, color, MMWorldType.NORMAL)
+    }
+
+    /**
+     * 导入指定名称指定类型的世界。
+     * @param name 世界的名称。
+     * @param alias 世界的别名。
+     * @param color 世界名称的颜色。
+     * @param generate 世界的生成器类型。
+     * @return 如果成功导入，返回true；否则返回false。
+     */
+    override fun importWorld(name: String, alias: String, color: String, generate: MMWorldType): Boolean {
         val file = File(plugin.server.worldContainer, name)
         if (!file.exists()) {
             plugin.logger.warning("§c未找到世界文件$name")
@@ -286,8 +298,17 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
             plugin.logger.info("地图版本过高")
             return false
         }
+        var gene = World.Environment.NORMAL
+        when (generate) {
+            MMWorldType.FLAT -> gene = World.Environment.NORMAL
+            MMWorldType.VOID -> gene = World.Environment.NORMAL
+            MMWorldType.NETHER -> gene = World.Environment.NETHER
+            MMWorldType.END -> gene = World.Environment.THE_END
+            else -> {
+            }
+        }
         try {
-            if (!mv?.addWorld(name, World.Environment.NORMAL, null, null, null, null, true)!!) {
+            if (!mv?.addWorld(name, gene, null, null, null, null, true)!!) {
                 plugin.logger.warning("§c导入" + name + "时出现错误")
                 return false
             }
