@@ -1,7 +1,9 @@
 package work.alsace.mapmanager.common.listener
 
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityTeleportEvent
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -13,8 +15,8 @@ class PlayerListener(private val plugin: MapManagerImpl) : Listener {
      * @param event 玩家进入游戏事件。
      */
     @EventHandler
-    fun onPlayerJoin(event: PlayerJoinEvent?) {
-        event?.player?.world?.name?.let { plugin.getDynamicWorld().cancelUnloadTask(it) }
+    fun onPlayerJoin(event: PlayerJoinEvent) {
+        event.player.world.name.let { plugin.getDynamicWorld().cancelUnloadTask(it) }
     }
 
     /**
@@ -22,9 +24,9 @@ class PlayerListener(private val plugin: MapManagerImpl) : Listener {
      * @param event 玩家离开游戏事件。
      */
     @EventHandler
-    fun onPlayerQuit(event: PlayerQuitEvent?) {
-        val player = event?.player
-        if (player?.world?.players?.size!! <= 1) plugin.getDynamicWorld().unloadWorldLater(player.world.name)
+    fun onPlayerQuit(event: PlayerQuitEvent) {
+        val player = event.player
+        if (player.world.players.size <= 1) plugin.getDynamicWorld().unloadWorldLater(player.world.name)
     }
 
     /**
@@ -32,13 +34,25 @@ class PlayerListener(private val plugin: MapManagerImpl) : Listener {
      * @param event 玩家切换世界事件。
      */
     @EventHandler
-    fun onPlayerChangeWorld(event: PlayerChangedWorldEvent?) {
-        val world = event?.from
-        world?.let {
+    fun onPlayerChangeWorld(event: PlayerChangedWorldEvent) {
+        val world = event.from
+        world.let {
             plugin.getDynamicWorld().unloadWorldLater(
                 it.name
             )
         }
-        event?.player?.world?.name?.let { plugin.getDynamicWorld().cancelUnloadTask(it) }
+        event.player.world.name.let { plugin.getDynamicWorld().cancelUnloadTask(it) }
+    }
+
+    @EventHandler
+    fun onPlayerTeleport(event: EntityTeleportEvent) {
+        val player = event.entity as Player
+        val world = event.to?.world
+        if (world != null) {
+            if (!player.hasPermission("multiverse.access.${world.name}")) {
+                event.isCancelled = true
+                player.sendMessage("§c你没有权限进入此地图")
+            }
+        }
     }
 }

@@ -122,7 +122,7 @@ Here are all commands which MapManager registered.
 
   Reload the config.
 
-* /import n:\<name\> a:\[alias\] c:\[color\] p:\<permission group\> o:\<owner\>
+* /import n:\<name\> a:\[alias\] c:\[color\] g:\<permission group\> o:\<owner\>
 
   Permission "mapmanager.command.import" is required.
 
