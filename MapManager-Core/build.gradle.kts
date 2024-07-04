@@ -52,6 +52,7 @@ hangarPublish {
         channel.set("Release")
         id.set("MapManager-Core")
         apiKey.set(System.getenv("HANGAR_TOKEN"))
+
         platforms {
             register(Platforms.PAPER) {
                 // Set the JAR file to upload
