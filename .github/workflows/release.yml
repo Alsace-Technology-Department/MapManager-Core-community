@@ -1,7 +1,7 @@
-name: pr-release
+name: release
 
 on:
-  pull_request:
+  release:
     branches:
       - main
 
