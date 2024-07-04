@@ -76,3 +76,6 @@ hangarPublish {
         }
     }
 }
+tasks.named("publishPluginPublicationToHangar") {
+    dependsOn(tasks.shadowJar)
+}
