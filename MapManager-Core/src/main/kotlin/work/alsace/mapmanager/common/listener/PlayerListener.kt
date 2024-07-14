@@ -44,14 +44,19 @@ class PlayerListener(private val plugin: MapManagerImpl) : Listener {
         event.player.world.name.let { plugin.getDynamicWorld().cancelUnloadTask(it) }
     }
 
+    /**
+     * 玩家切换世界时，检测是否有权限
+     */
     @EventHandler
     fun onPlayerTeleport(event: EntityTeleportEvent) {
-        val player = event.entity as Player
-        val world = event.to?.world
-        if (world != null) {
-            if (!player.hasPermission("multiverse.access.${world.name}")) {
-                event.isCancelled = true
-                player.sendMessage("§c你没有权限进入此地图")
+        if (event.entity is Player) {
+            val player = event.entity as Player
+            val world = event.to?.world
+            if (world != null) {
+                if (!player.hasPermission("multiverse.access.${world.name}")) {
+                    event.isCancelled = true
+                    player.sendMessage("§c你没有权限进入此地图")
+                }
             }
         }
     }
