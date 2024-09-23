@@ -163,7 +163,7 @@ Gradle (kotlin)
 
 ```kts
 maven(url = "https://oss.sonatype.org/content/groups/public/")
-compileOnly("work.alsace.mapmanager:MapManager-Core:3.0")
+compileOnly("work.alsace.mapmanager:MapManager-Core:3.1.7")
 ```
 
 ### JavaDoc

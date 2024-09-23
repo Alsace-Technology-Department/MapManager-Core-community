@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "work.alsace.mapmanager"
-version = "3.1.6"
+version = "3.1.7"
 
 dependencies {
     implementation(project(":MapManager-API"))
