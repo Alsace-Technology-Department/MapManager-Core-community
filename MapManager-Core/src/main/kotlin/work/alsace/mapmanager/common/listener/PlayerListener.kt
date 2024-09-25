@@ -16,7 +16,8 @@ class PlayerListener(private val plugin: MapManagerImpl) : Listener {
      */
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        event.player.world.name.let { plugin.getDynamicWorld().cancelUnloadTask(it) }
+        val worldName = event.player.world.name
+        plugin.getDynamicWorld().cancelUnloadTask(worldName)
     }
 
     /**
@@ -35,13 +36,14 @@ class PlayerListener(private val plugin: MapManagerImpl) : Listener {
      */
     @EventHandler
     fun onPlayerChangeWorld(event: PlayerChangedWorldEvent) {
-        val world = event.from
-        world.let {
-            plugin.getDynamicWorld().unloadWorldLater(
-                it.name
-            )
-        }
-        event.player.world.name.let { plugin.getDynamicWorld().cancelUnloadTask(it) }
+        val fromWorld = event.from
+        val toWorld = event.player.world
+
+        // 卸载玩家离开的世界
+        plugin.getDynamicWorld().unloadWorldLater(fromWorld.name)
+
+        // 取消卸载玩家进入的世界
+        plugin.getDynamicWorld().cancelUnloadTask(toWorld.name)
     }
 
     /**
@@ -49,15 +51,12 @@ class PlayerListener(private val plugin: MapManagerImpl) : Listener {
      */
     @EventHandler
     fun onPlayerTeleport(event: EntityTeleportEvent) {
-        if (event.entity is Player) {
-            val player = event.entity as Player
-            val world = event.to?.world
-            if (world != null) {
-                if (!player.hasPermission("multiverse.access.${world.name}")) {
-                    event.isCancelled = true
-                    player.sendMessage("§c你没有权限进入此地图")
-                }
-            }
+        val player = event.entity as? Player ?: return
+        val world = event.to?.world ?: return
+
+        if (!player.hasPermission("multiverse.access.${world.name}")) {
+            event.isCancelled = true
+            player.sendMessage("§c你没有权限进入此地图")
         }
     }
 }

@@ -73,16 +73,21 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
      */
     override fun unloadWorldLater(name: String) {
         if (!loaded.contains(name)) return
-        plugin.logger.info(name + "准备卸载")
-        val runnable: BukkitRunnable = object : BukkitRunnable() {
+        plugin.logger.info("$name 准备卸载")
+
+        val runnable = object : BukkitRunnable() {
             override fun run() {
-                if (name.let { Bukkit.getWorld(it)?.players?.size }!! <= 0) mv?.unloadWorld(name, true)
-                loaded.remove(name)
-                tasks.remove(name)
-                plugin.logger.info(name + "已卸载")
+                val world = Bukkit.getWorld(name)
+                if (world?.players?.isEmpty() == true) {
+                    mv?.unloadWorld(name, true)
+                    loaded.remove(name)
+                    tasks.remove(name)
+                    plugin.logger.info("$name 已卸载")
+                }
             }
         }
-        plugin.let { runnable.runTaskLater(it, 12000) }
+
+        runnable.runTaskLater(plugin, 12000)
         tasks[name] = runnable
     }
 
@@ -154,15 +159,20 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
      * @return 匹配前缀的所有世界名称列表。
      */
     override fun getWorlds(prefix: String): MutableList<String> {
-        val list: MutableList<String> = ArrayList()
-        val lower = prefix.lowercase(Locale.getDefault())
-        Bukkit.getWorlds().stream()
-            .map { obj: World? -> obj?.name }
-            .filter { name: String? -> lower.let { name?.lowercase(Locale.getDefault())?.startsWith(it) } == true }
-            .forEach { e: String? -> e?.let { list.add(it) } }
-        mv?.unloadedWorlds?.stream()
-            ?.filter { name: String? -> lower.let { name?.lowercase(Locale.getDefault())?.startsWith(it) } == true }
-            ?.forEach { e: String? -> e?.let { list.add(it) } }
+        val list = mutableListOf<String>()
+        val lowerPrefix = prefix.lowercase(Locale.getDefault())
+
+        // 过滤和添加已加载的世界
+        Bukkit.getWorlds()
+            .mapNotNull { it.name }  // 直接获取世界名称，忽略为 null 的世界
+            .filter { it.lowercase(Locale.getDefault()).startsWith(lowerPrefix) }
+            .forEach { list.add(it) }
+
+        // 过滤和添加未加载的世界
+        mv?.unloadedWorlds
+            ?.filter { it.lowercase(Locale.getDefault()).startsWith(lowerPrefix) }
+            ?.forEach { list.add(it) }
+
         return list
     }
 
@@ -173,30 +183,26 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
      */
     override fun getOwnerWorlds(player: String): List<String> {
         val luckPerms = plugin.getLuckPerms()
-        val playerUuid = plugin.getMapAgent().getUniqueID(player)
+        val playerUuid = plugin.getMapAgent().getUniqueID(player) ?: return emptyList()
+
         plugin.logger.info(playerUuid.toString())
-        val userFuture = luckPerms.userManager.loadUser(playerUuid!!)
-        val user = userFuture.join() ?: return emptyList()
-        plugin.logger.info(user.username)
-        return getWorlds("").stream()
-            .map { world: String ->
-                plugin.getMapAgent().getWorldGroupName(
-                    world
-                )
+
+        val user = luckPerms.userManager.loadUser(playerUuid).join() ?: return emptyList()
+
+        plugin.logger.info(user.username ?: "Unknown user")
+
+        return getWorlds("")
+            .mapNotNull { world ->
+                plugin.getMapAgent().getWorldGroupName(world)
             }
-            .filter { group: String? ->
-                hasPermission(
-                    user,
-                    "mapmanager.admin.$group"
-                )
+            .filter { group ->
+                hasPermission(user, "mapmanager.admin.$group")
             }
-            .flatMap { group: String? ->
-                plugin.getMapAgent().getWorldListByGroup(
-                    group!!
-                )!!.stream()
+            .flatMap { group ->
+                plugin.getMapAgent().getWorldListByGroup(group)?.asSequence() ?: emptySequence()
             }
             .distinct()
-            .collect(Collectors.toList())
+            .toList()
     }
 
     /**
@@ -206,20 +212,14 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
      */
     override fun getAccessWorlds(name: String): List<String> {
         val luckPerms = plugin.getLuckPerms()
-        val playerUuid = plugin.getMapAgent().getUniqueID(name)
-        val userFuture = luckPerms.userManager.loadUser(
-            playerUuid!!
-        )
-        val user = userFuture.join() ?: return emptyList()
+        val playerUuid = plugin.getMapAgent().getUniqueID(name) ?: return emptyList()
 
-        return getWorlds("").stream()
-            .filter { world: String ->
-                hasPermission(
-                    user,
-                    "multiverse.access.$world"
-                )
+        val user = luckPerms.userManager.loadUser(playerUuid).join() ?: return emptyList()
+
+        return getWorlds("")
+            .filter { world ->
+                hasPermission(user, "multiverse.access.$world")
             }
-            .collect(Collectors.toList())
     }
 
     /**
@@ -228,10 +228,8 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
      * @return 对应的MultiverseWorld实例，如果未找到则返回null。
      */
     override fun getCorrectWorld(name: String): MultiverseWorld? {
-        return mv?.mvWorlds?.stream()
-            ?.filter { world: MultiverseWorld? -> world?.name.equals(name, ignoreCase = true) }
-            ?.findFirst()
-            ?.orElse(null)
+        return mv?.mvWorlds
+            ?.find { world -> world?.name.equals(name, ignoreCase = true) }
     }
 
     /**
@@ -419,6 +417,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
         world?.autoLoad = true
         world?.setKeepSpawnInMemory(false)
         world?.setGameMode(GameMode.CREATIVE)
+        world?.setAllowAnimalSpawn(false)
         val w = world?.cbWorld
         w?.setGameRule(GameRule.RANDOM_TICK_SPEED, 0)
         w?.setGameRule(GameRule.DO_FIRE_TICK, false)
@@ -436,7 +435,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
 
     /**
      * 判断玩家是否有权限
-     * @param user 玩家Luckperms实体
+     * @param user 玩家LuckPerms实体
      * @param permission 权限节点
      * @return 结果
      */

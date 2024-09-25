@@ -147,10 +147,10 @@ Here are all commands which MapManager registered.
 Maven
 
 ```xml
- <repository>
+<repository>
      <id>sonatype</id>
      <url>https://oss.sonatype.org/content/groups/public/</url>
- </repository>
+</repository>
 <dependency>
     <groupId>work.alsace.mapmanager</groupId>
     <artifactId>MapManager-Core</artifactId>
