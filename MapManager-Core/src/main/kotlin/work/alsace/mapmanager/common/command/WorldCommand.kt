@@ -1,23 +1,18 @@
-@file:Suppress("DEPRECATION")
-
-package work.alsace.mapmanager.command
+package work.alsace.mapmanager.common.command
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
-import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.ComponentBuilder
-import net.md_5.bungee.api.chat.HoverEvent
-import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
-import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 import work.alsace.mapmanager.MapManager
-import work.alsace.mapmanager.command.WorldCommandV116.Operation.*
 import work.alsace.mapmanager.enums.MapGroup
 import work.alsace.mapmanager.service.DynamicWorld
 import work.alsace.mapmanager.service.MapAgent
@@ -28,20 +23,11 @@ import java.util.regex.Pattern
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-class WorldCommandV116(plugin: MapManager) : TabExecutor {
+class WorldCommand(plugin: MapManager) : TabExecutor {
     private var args: Array<String>? = null
     private var sender: CommandSender? = null
     private val dynamicWorld: DynamicWorld = plugin.getDynamicWorld()
     private val mapAgent: MapAgent = plugin.getMapAgent()
-    private val cmdGuide: Component = Component.text("命令指南：", NamedTextColor.DARK_AQUA)
-        .append(
-            Component.text(
-                "https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-DBtWdNaH9oS1FJxCBNrcSsbAnjf",
-                NamedTextColor.AQUA,
-                TextDecoration.UNDERLINED
-            )
-                .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-DBtWdNaH9oS1FJxCBNrcSsbAnjf"))
-        )
     private val subCommand1: MutableList<String> = mutableListOf(
         "admin",
         "admins",
@@ -62,7 +48,15 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
         mutableListOf("on", "enable", "true", "yes", "off", "disable", "false", "no", "info", "status")
     private val emptyList: MutableList<String?> = ArrayList(0)
     private val format: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
-
+    private val cmdGuide: Component = Component.text("命令指南：", NamedTextColor.DARK_AQUA)
+        .append(
+            Component.text(
+                "https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-DBtWdNaH9oS1FJxCBNrcSsbAnjf",
+                NamedTextColor.AQUA,
+                TextDecoration.UNDERLINED
+            )
+                .clickEvent(ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-DBtWdNaH9oS1FJxCBNrcSsbAnjf"))
+        )
 
     enum class Operation {
         ENABLE,
@@ -73,15 +67,15 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
     private fun getOperation(name: String): Operation {
         return when (name.lowercase(Locale.getDefault())) {
             "on", "enable", "true", "yes" -> {
-                ENABLE
+                Operation.ENABLE
             }
 
             "off", "disable", "false", "no" -> {
-                DISABLE
+                Operation.DISABLE
             }
 
             else -> {
-                STATUS
+                Operation.STATUS
             }
         }
     }
@@ -246,8 +240,8 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                 sender.sendMessage("§b有下列玩家为该地图的管理员（共" + admins.size + "人）：")
                 if (hasPermission(sender)) listMembers(
                     admins,
-                    ChatColor.DARK_AQUA,
-                    ChatColor.AQUA,
+                    NamedTextColor.DARK_AQUA,
+                    NamedTextColor.AQUA,
                     "admin",
                     "管理员",
                     sender
@@ -294,7 +288,7 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
             }
 
             "builders" -> {
-                if (dynamicWorld.getMVWorld(sender.world.name)!!.color == ChatColor.GOLD) {
+                if (mapAgent.isPublic(sender.world.name)) {
                     sender.sendMessage("§e该地图为公共地图，所有玩家均可进入并自由建筑")
                     return false
                 }
@@ -316,8 +310,8 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                 sender.sendMessage("§e有下列玩家为该地图的建筑人员（共" + builders.size + "人）：")
                 if (hasPermission(sender)) listMembers(
                     builders,
-                    ChatColor.GOLD,
-                    ChatColor.YELLOW,
+                    NamedTextColor.GOLD,
+                    NamedTextColor.YELLOW,
                     "builder",
                     "建筑人员",
                     sender
@@ -356,12 +350,7 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
             }
 
             "visitors" -> {
-                val color = dynamicWorld.getMVWorld(sender.world.name)?.color
-                if (color == ChatColor.GOLD) {
-                    sender.sendMessage("§a该地图为公共地图，所有玩家均可进入并自由建筑")
-                    return false
-                }
-                if (color == ChatColor.DARK_GREEN) {
+                if (mapAgent.isPublic(sender.world.name)) {
                     sender.sendMessage("§a该地图允许任何玩家进来参观")
                     return false
                 }
@@ -383,8 +372,8 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                 sender.sendMessage("§a有下列玩家可进来参观该地图（共" + visitors.size + "人）：")
                 if (hasPermission(sender)) listMembers(
                     visitors,
-                    ChatColor.DARK_GREEN,
-                    ChatColor.GREEN,
+                    NamedTextColor.DARK_GREEN,
+                    NamedTextColor.GREEN,
                     "visitor",
                     "参观",
                     sender
@@ -434,13 +423,9 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     return false
                 }
                 val world = dynamicWorld.getMVWorld(sender.world.name)
-                val result = ignoreColor(args[1], world?.color)
-                if (world != null) {
-                    world.alias = result
-                }
-                if (world != null) {
-                    sender.sendMessage("§a已将世界名称修改为： " + world.color + result)
-                }
+                val result = ignoreColor(args[1], world?.color!!)
+                world.alias = result
+                sender.sendMessage("§a已将世界名称修改为： " + world.color + result)
             }
 
             "blockupdate", "physics", "physical" -> {
@@ -451,19 +436,19 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     return false
                 }
                 when (getOperation(args[1])) {
-                    ENABLE -> {
+                    Operation.ENABLE -> {
                         //set to true
                         mapAgent.setPhysical(sender.world.name, true)
                         sender.sendMessage("§a已开启方块更新")
                     }
 
-                    DISABLE -> {
+                    Operation.DISABLE -> {
                         //set to false
                         mapAgent.setPhysical(sender.world.name, false)
                         sender.sendMessage("§a已关闭方块更新")
                     }
 
-                    STATUS -> {
+                    Operation.STATUS -> {
                         //show the status
                         sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 方块更新")
                     }
@@ -478,19 +463,19 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     return false
                 }
                 when (getOperation(args[1])) {
-                    ENABLE -> {
+                    Operation.ENABLE -> {
                         //set to true
                         mapAgent.setExploded(sender.world.name, true)
                         sender.sendMessage("§a已开启爆炸保护")
                     }
 
-                    DISABLE -> {
+                    Operation.DISABLE -> {
                         //set to false
                         mapAgent.setExploded(sender.world.name, false)
                         sender.sendMessage("§a已关闭爆炸保护")
                     }
 
-                    STATUS -> {
+                    Operation.STATUS -> {
                         //show the status
                         sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 爆炸保护")
                     }
@@ -511,19 +496,19 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     return false
                 }
                 when (getOperation(args[1])) {
-                    ENABLE -> {
+                    Operation.ENABLE -> {
                         //set to true
                         dynamicWorld.getMVWorld(sender.world.name)?.setPVPMode(true)
                         sender.sendMessage("§a已开启PVP")
                     }
 
-                    DISABLE -> {
+                    Operation.DISABLE -> {
                         //set to false
                         dynamicWorld.getMVWorld(sender.world.name)?.setPVPMode(false)
                         sender.sendMessage("§a已关闭PVP")
                     }
 
-                    STATUS -> {
+                    Operation.STATUS -> {
                         //show the status
                         sender.sendMessage(
                             "§b当前地图已 "
@@ -544,21 +529,21 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
                     return false
                 }
                 when (getOperation(args[1])) {
-                    ENABLE -> {
+                    Operation.ENABLE -> {
                         //set to true
                         if (mapAgent.publicizeWorld(sender.world.name)) sender.sendMessage("§a已公开地图") else sender.sendMessage(
                             "§c公开失败，请联系管理员以解决该问题"
                         )
                     }
 
-                    DISABLE -> {
+                    Operation.DISABLE -> {
                         //set to false
                         if (mapAgent.privatizeWorld(sender.world.name)) sender.sendMessage("§a已取消公开地图") else sender.sendMessage(
                             "§c取消公开失败，请联系管理员以解决该问题"
                         )
                     }
 
-                    STATUS -> {
+                    Operation.STATUS -> {
                         //show the status
                         sender.sendMessage("§b当前地图已 " + if (mapAgent.isPublic(sender.world.name)) "公开" else "未公开")
                     }
@@ -597,23 +582,26 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
             }
 
             else -> {
-                sender.sendMessage("§c未知操作，请查阅命令指南以获取帮助")
+                sender.sendMessage("§c未知操作，请点击下方链接查阅命令指南以获取帮助")
                 sender.sendMessage(cmdGuide)
             }
         }
         return true
     }
 
-    private fun noPermission(player: Player): Boolean {
+    private fun noPermission(player: Player?): Boolean {
         if (!hasPermission(player)) {
-            player.sendMessage("§c你没有权限使用此命令")
+            player?.sendMessage("§c你没有权限使用此命令")
             return true
         }
         return false
     }
 
-    private fun hasPermission(player: Player): Boolean {
-        return player.hasPermission("mapmanager.admin." + mapAgent.getWorldGroupName(player.world.name))
+    private fun hasPermission(player: Player?): Boolean {
+        if (player != null) {
+            return player.hasPermission("mapmanager.admin." + mapAgent.getWorldGroupName(player.world.name))
+        }
+        return false
     }
 
     private fun notEnough(n: Int): Boolean {
@@ -624,7 +612,7 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
         return false
     }
 
-    private fun ignoreColor(string: String?, color: ChatColor?): String {
+    private fun ignoreColor(string: String?, color: Any): String {
         val hexPattern = Pattern.compile(/* regex = 十六进制颜色*/ "&([A-Fa-f0-9k-oK-O]|R|r)")
         val matcher = string?.let { hexPattern.matcher(it) }
         val builder = string?.let { StringBuilder(it.length) }
@@ -650,29 +638,15 @@ class WorldCommandV116(plugin: MapManager) : TabExecutor {
         return true
     }
 
-    private fun listMembers(
-        set: MutableSet<String>,
-        a: ChatColor,
-        b: ChatColor,
-        group: String,
-        perm: String,
-        sender: CommandSender
-    ) {
+    private fun listMembers(set: MutableSet<String>, a: TextColor, b: TextColor, group: String, perm: String, sender: CommandSender) {
         for (name in set) {
             if (name.isEmpty()) continue
-
-            val prefix = TextComponent("$a> ")
-            val body = TextComponent(b.toString() + name)
-            body.hoverEvent = HoverEvent(
-                HoverEvent.Action.SHOW_TEXT,
-                ComponentBuilder("点击此处以取消" + name + "的" + perm + "资格").create()
-            )
-            body.clickEvent = ClickEvent(
-                ClickEvent.Action.SUGGEST_COMMAND,
-                "/world $group remove $name"
-            )
-
-            sender.sendMessage(prefix, body)
+            val prefix: Component = Component.text("> ", a)
+            val body: Component = Component.text(name, b)
+                .hoverEvent(HoverEvent.showText(Component.text("点击此处以取消" + name + "的" + perm + "资格")))
+                .clickEvent(ClickEvent.suggestCommand("/world $group remove $name"))
+            sender.sendMessage(prefix.append(body))
         }
     }
+
 }
