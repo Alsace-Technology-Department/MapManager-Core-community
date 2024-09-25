@@ -1,4 +1,4 @@
-package work.alsace.mapmanager.command
+package work.alsace.mapmanager.common.command
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
@@ -23,7 +23,7 @@ import java.util.regex.Pattern
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-class WorldCommandV120(plugin: MapManager) : TabExecutor {
+class WorldCommand(plugin: MapManager) : TabExecutor {
     private var args: Array<String>? = null
     private var sender: CommandSender? = null
     private val dynamicWorld: DynamicWorld = plugin.getDynamicWorld()
@@ -459,25 +459,25 @@ class WorldCommandV120(plugin: MapManager) : TabExecutor {
                 if (noPermission(sender)) return false
                 if (args.size < 2) {
                     //show the status;
-                    sender.sendMessage("§b当前地图已 " + (if (mapAgent.isExploded(sender.world.name)) "开启" else "关闭") + " 爆炸破坏")
+                    sender.sendMessage("§b当前地图已 " + (if (mapAgent.isExploded(sender.world.name)) "开启" else "关闭") + " 爆炸保护")
                     return false
                 }
                 when (getOperation(args[1])) {
                     Operation.ENABLE -> {
                         //set to true
                         mapAgent.setExploded(sender.world.name, true)
-                        sender.sendMessage("§a已开启爆炸破坏")
+                        sender.sendMessage("§a已开启爆炸保护")
                     }
 
                     Operation.DISABLE -> {
                         //set to false
                         mapAgent.setExploded(sender.world.name, false)
-                        sender.sendMessage("§a已关闭爆炸破坏")
+                        sender.sendMessage("§a已关闭爆炸保护")
                     }
 
                     Operation.STATUS -> {
                         //show the status
-                        sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 爆炸破坏")
+                        sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 爆炸保护")
                     }
                 }
             }

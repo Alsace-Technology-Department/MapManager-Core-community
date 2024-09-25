@@ -56,6 +56,7 @@ class MapManagerImpl : JavaPlugin(), MapManager {
         registerCommand("write", WriteCommand(this))
         registerCommand("worldtp", WorldTPCommand(this))
         registerCommand("create", CreateCommand(this))
+        registerCommand("world", WorldCommand(this))
         setVersionCheck(VersionCheckImpl(this))
         server.pluginManager.registerEvents(BlockListener(this), this)
         server.pluginManager.registerEvents(PlayerListener(this), this)
