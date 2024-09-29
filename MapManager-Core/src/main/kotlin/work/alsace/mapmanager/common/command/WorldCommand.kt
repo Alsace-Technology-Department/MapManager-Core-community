@@ -48,14 +48,14 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
         mutableListOf("on", "enable", "true", "yes", "off", "disable", "false", "no", "info", "status")
     private val emptyList: MutableList<String?> = ArrayList(0)
     private val format: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
-    private val cmdGuide: Component = Component.text("命令指南：", NamedTextColor.DARK_AQUA)
+    private val cmdGuide: Component = Component.text("MapManager 命令帮助：", NamedTextColor.DARK_AQUA)
         .append(
             Component.text(
-                "https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-DBtWdNaH9oS1FJxCBNrcSsbAnjf",
+                "点我跳转到命令指南",
                 NamedTextColor.AQUA,
                 TextDecoration.UNDERLINED
             )
-                .clickEvent(ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/Pm87wSa3oikct9kqdTNcJm0Pnke#part-DBtWdNaH9oS1FJxCBNrcSsbAnjf"))
+                .clickEvent(ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/DUXGwcaM8ij703kXS9JccgDcnwf"))
         )
 
     enum class Operation {
