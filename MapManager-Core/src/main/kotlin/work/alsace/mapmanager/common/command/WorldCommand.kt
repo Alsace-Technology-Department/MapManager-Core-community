@@ -48,6 +48,7 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
         mutableListOf("on", "enable", "true", "yes", "off", "disable", "false", "no", "info", "status")
     private val emptyList: MutableList<String?> = ArrayList(0)
     private val format: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
+
     private val cmdGuide: Component = Component.text("MapManager 命令帮助：", NamedTextColor.DARK_AQUA)
         .append(
             Component.text(
@@ -55,7 +56,7 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
                 NamedTextColor.AQUA,
                 TextDecoration.UNDERLINED
             )
-                .clickEvent(ClickEvent.openUrl("https://alsaceteam.feishu.cn/wiki/DUXGwcaM8ij703kXS9JccgDcnwf"))
+                .clickEvent(ClickEvent.openUrl("https://www.alsace.team/uj?url=command-guide"))
         )
 
     enum class Operation {
