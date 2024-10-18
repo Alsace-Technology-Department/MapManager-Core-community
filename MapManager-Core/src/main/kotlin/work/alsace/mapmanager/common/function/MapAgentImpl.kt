@@ -99,20 +99,9 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @param player 玩家名称
      * @return 返回玩家的UUID
      */
-    override fun getUniqueID(player: String): UUID? {
-        val online = plugin.server.getPlayer(player)
-        if (online == null) {
-            val lowerPlayer = player.lowercase(Locale.getDefault())
-            for (off in plugin.server.offlinePlayers) {
-                val offline = off.name
-                if (offline != null && offline.lowercase(Locale.getDefault()) == lowerPlayer) {
-                    return UUID.nameUUIDFromBytes("OfflinePlayer:$offline".toByteArray())
-                }
-            }
-        } else {
-            return online.uniqueId
-        }
-        return null
+    override fun getUniqueID(player: String): UUID {
+        return plugin.server.getPlayer(player)?.uniqueId
+            ?: UUID.nameUUIDFromBytes("OfflinePlayer:$player".toByteArray())
     }
 
     /**
@@ -121,27 +110,15 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return Player 玩家实体
      */
     override fun getPlayer(player: String): Player? {
-        val online = plugin.server.getPlayer(player)
-        if (online == null) {
-            player.lowercase(Locale.getDefault())
-            for (off in plugin.server.offlinePlayers) {
-                val name = off.name
-                if (name != null && name.lowercase(Locale.getDefault()) == player)
-                    return plugin.server.getPlayer(
-                        UUID.nameUUIDFromBytes(
-                            "OfflinePlayer:$off".toByteArray()
-                        )
-                    )
-            }
-        }
-        return online
+        //TODO 获取离线玩家实体
+        return plugin.server.getPlayer(getUniqueID(player))
+            ?: plugin.server.getOfflinePlayer(getUniqueID(player)).player
     }
 
     private fun getProcess(owner: String?): CompletableFuture<User?>? {
         if (owner == null) return null
-        return getUniqueID(owner)?.let { uuid ->
-            luckPerms.userManager.loadUser(uuid)
-        } ?: CompletableFuture.supplyAsync { null }
+        val uuid = getUniqueID(owner)
+        return luckPerms.userManager.loadUser(uuid)
     }
 
     /**
@@ -290,28 +267,18 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
     override fun addPlayer(world: String, group: MapGroup, player: String): Boolean {
         val worldGroup = getWorldGroupName(world)
         if (world == "__nil") {
-            plugin.logger.warning("§c无法找到" + world + "对应的权限组")
+            plugin.logger.warning("无法找到" + world + "对应的权限组")
             return false
         }
-        var uuid: UUID? = null
-        var name = ""
-        val online = player.let { plugin.server.getPlayer(it) }
-        if (online == null) {
-            for (off in plugin.server.offlinePlayers!!) {
-                if (Objects.requireNonNull<String?>(off.name).equals(player, ignoreCase = true)) {
-                    uuid = off.uniqueId
-                    name = off.name.toString()
-                    break
-                }
-            }
-            if (uuid == null) {
-                plugin.logger.info("§c玩家" + player + "不存在")
-                return false
-            }
-        } else {
-            uuid = online.uniqueId
-            name = online.name
+        val uuid = getUniqueID(player)
+        val name = getPlayer(player)?.name
+
+        //FIXME 无法找到离线玩家
+        if (name == null) {
+            plugin.logger.warning("无法找到玩家$player")
+            return false
         }
+
         val user: User? = try {
             luckPerms.userManager.loadUser(uuid).get()
         } catch (e: ExecutionException) {
@@ -480,7 +447,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
         return dynamicWorld.hasPermission(user, "mapmanager.admin." + getWorldGroupName(world))
     }
 
-    //name -> group name | world name
+//name -> group name | world name
     /**
      * 获取指定名称的玩家集合，基于指定的权限组筛选。
      *
@@ -623,7 +590,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
     }
 
 
-    //Getters and setters
+//Getters and setters
     /**
      * 获取地图别名
      *
