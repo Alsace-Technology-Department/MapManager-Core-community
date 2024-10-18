@@ -100,13 +100,14 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 返回玩家的UUID
      */
     override fun getUniqueID(player: String): UUID? {
-        var offline = player
         val online = plugin.server.getPlayer(player)
         if (online == null) {
-            offline = offline.lowercase(Locale.getDefault())
+            val lowerPlayer = player.lowercase(Locale.getDefault())
             for (off in plugin.server.offlinePlayers) {
-                val name = off.name
-                if (name != null && name.lowercase(Locale.getDefault()) == offline) return off.uniqueId
+                val offline = off.name
+                if (offline != null && offline.lowercase(Locale.getDefault()) == lowerPlayer) {
+                    return UUID.nameUUIDFromBytes("OfflinePlayer:$offline".toByteArray())
+                }
             }
         } else {
             return online.uniqueId
@@ -125,15 +126,22 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
             player.lowercase(Locale.getDefault())
             for (off in plugin.server.offlinePlayers) {
                 val name = off.name
-                if (name != null && name.lowercase(Locale.getDefault()) == player) return plugin.server.getPlayer(off.uniqueId)
+                if (name != null && name.lowercase(Locale.getDefault()) == player)
+                    return plugin.server.getPlayer(
+                        UUID.nameUUIDFromBytes(
+                            "OfflinePlayer:$off".toByteArray()
+                        )
+                    )
             }
         }
         return online
     }
 
     private fun getProcess(owner: String?): CompletableFuture<User?>? {
-        val uuid = owner?.let { getUniqueID(it) }
-        return if (uuid == null) CompletableFuture.supplyAsync { null } else luckPerms.userManager.loadUser(uuid)
+        if (owner == null) return null
+        return getUniqueID(owner)?.let { uuid ->
+            luckPerms.userManager.loadUser(uuid)
+        } ?: CompletableFuture.supplyAsync { null }
     }
 
     /**
@@ -162,6 +170,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
         }.thenAcceptBoth<User>(
             getProcess(owner)
         ) { lp: Group, user: User ->
+            plugin.logger.info("owner: $owner, user: $user")
             user.data().add(PermissionNode.builder("mapmanager.admin.$groupLowerCase").build())
             user.data().add(InheritanceNode.builder(lp).build())
             luckPerms.userManager.saveUser(user)
