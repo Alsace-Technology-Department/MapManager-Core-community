@@ -65,7 +65,7 @@ class CreateCommand(private val plugin: MapManagerImpl) : TabExecutor {
         for (arg in args) {
             when (arg.substring(0, 2)) {
                 "n:" -> name = arg.substring(2)
-                "e" -> generate = arg.substring(2)
+                "e:" -> generate = arg.substring(2)
                 "a:" -> alias = arg.substring(2)
                 "c:" -> color = arg.substring(2)
                 "g:" -> group = arg.substring(2)
@@ -80,6 +80,7 @@ class CreateCommand(private val plugin: MapManagerImpl) : TabExecutor {
         if (owner == null) owner = sender.name
         if (alias == null) alias = name
         if (group == null) group = name
+        plugin.logger.warning("cmd: $generate")
         val generateType: MMWorldType = when (generate) {
             "void_gen" -> MMWorldType.VOID
             "normal" -> MMWorldType.NORMAL

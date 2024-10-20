@@ -335,6 +335,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
             plugin.logger.warning("§c世界" + name + "已经存在")
             return false
         }
+        plugin.logger.warning("worldtype: ${generate.name}")
         when (generate) {
             MMWorldType.VOID -> {
                 if (!mv!!.addWorld(
@@ -350,6 +351,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
             }
 
             MMWorldType.NORMAL -> {
+                plugin.logger.warning("normal world")
                 if (!mv!!.addWorld(
                         name,
                         World.Environment.NORMAL,
@@ -389,6 +391,7 @@ class DynamicWorldImpl(private val plugin: MapManagerImpl) : DynamicWorld {
             }
 
             else -> {
+                plugin.logger.warning("flat world")
                 if (!mv!!.addWorld(
                         name,
                         World.Environment.NORMAL,
