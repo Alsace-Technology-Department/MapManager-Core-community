@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "work.alsace.mapmanager"
-version = "3.1.7"
+version = "3.1.8"
 
 dependencies {
     implementation(kotlin("stdlib"))

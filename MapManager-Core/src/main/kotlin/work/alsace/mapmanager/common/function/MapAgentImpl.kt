@@ -110,10 +110,21 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return Player 玩家实体
      */
     override fun getPlayer(player: String): Player? {
-        //TODO 获取离线玩家实体
         return plugin.server.getPlayer(getUniqueID(player))
             ?: plugin.server.getOfflinePlayer(getUniqueID(player)).player
     }
+
+    override fun isPlayerRegister(player: String): Boolean {
+        val online = plugin.server.getPlayer(player)
+        if (online != null) return true // 玩家在线
+        for (off in plugin.server.offlinePlayers) {
+            val uuid = off.uniqueId
+            if (uuid == getUniqueID(player)) return true
+        }
+        // 没有找到玩家
+        return false
+    }
+
 
     private fun getProcess(owner: String?): CompletableFuture<User?>? {
         if (owner == null) return null
@@ -271,10 +282,8 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
             return false
         }
         val uuid = getUniqueID(player)
-        val name = getPlayer(player)?.name
 
-        //FIXME 无法找到离线玩家
-        if (name == null) {
+        if (!isPlayerRegister(player)) {
             plugin.logger.warning("无法找到玩家$player")
             return false
         }
@@ -292,24 +301,24 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
             MapGroup.ADMIN -> {
                 run {
                     user?.data()?.add(PermissionNode.builder("mapmanager.admin.$worldGroup").build())
-                    addAdmin(world, name)
+                    addAdmin(world, player)
                 }
                 run {
                     worldGroup.let { InheritanceNode.builder(it!!).build() }.let { user?.data()?.add(it) }
-                    addBuilder(world, name)
+                    addBuilder(world, player)
                 }
             }
 
             MapGroup.BUILDER -> {
                 worldGroup.let { InheritanceNode.builder(it!!).build() }.let { user?.data()?.add(it) }
-                addBuilder(world, name)
+                addBuilder(world, player)
             }
 
             MapGroup.VISITOR -> {
                 user?.data()?.add(
                     PermissionNode.builder("multiverse.access." + world.lowercase(Locale.getDefault())).build()
                 )
-                addVisitor(world, name)
+                addVisitor(world, player)
             }
         }
         user?.let { luckPerms.userManager.saveUser(it) }
