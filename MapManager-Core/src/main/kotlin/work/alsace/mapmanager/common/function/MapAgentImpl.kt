@@ -125,7 +125,6 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
         return false
     }
 
-
     private fun getProcess(owner: String?): CompletableFuture<User?>? {
         if (owner == null) return null
         val uuid = getUniqueID(owner)
@@ -158,7 +157,6 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
         }.thenAcceptBoth<User>(
             getProcess(owner)
         ) { lp: Group, user: User ->
-            plugin.logger.info("owner: $owner, user: $user")
             user.data().add(PermissionNode.builder("mapmanager.admin.$groupLowerCase").build())
             user.data().add(InheritanceNode.builder(lp).build())
             luckPerms.userManager.saveUser(user)
@@ -278,7 +276,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
     override fun addPlayer(world: String, group: MapGroup, player: String): Boolean {
         val worldGroup = getWorldGroupName(world)
         if (world == "__nil") {
-            plugin.logger.warning("无法找到" + world + "对应的权限组")
+            plugin.logger.warning("§c无法找到" + world + "对应的权限组")
             return false
         }
         val uuid = getUniqueID(player)
