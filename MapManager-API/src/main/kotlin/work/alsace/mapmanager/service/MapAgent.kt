@@ -234,11 +234,18 @@ interface MapAgent {
     fun getUniqueID(player: String): UUID?
 
     /**
-     * 通过玩家名获取服务器玩家
+     * 通过玩家名获取服务器在线玩家
      * @param player 玩家id
      * @return Player 玩家实体
      */
     fun getPlayer(player: String): Player?
+
+    /**
+     * 判断玩家是否在服务器注册(登录过)
+     * @param player 玩家id
+     * @return Boolean 是否注册，true为注册，false为未注册。
+     */
+    fun isPlayerRegister(player: String): Boolean
 
     /**
      * 保存MapManager信息。
