@@ -605,7 +605,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return String 别名
      */
     override fun getWorldAlias(worldName: String): String {
-        return dynamicWorld.getMVWorld(worldName)!!.alias
+        return dynamicWorld.getMVWorld(worldName)?.alias ?: worldName
     }
 
     /**
