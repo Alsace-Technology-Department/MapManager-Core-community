@@ -133,25 +133,25 @@ interface MapAgent {
     fun isPhysical(world: String): Boolean
 
     /**
-     * 设置全局爆炸保护状态。
+     * 设置全局爆炸破坏状态。
      *
-     * @param exploded 新的爆炸保护状态。
+     * @param exploded 新的爆炸破坏状态。
      */
     fun setExploded(exploded: Boolean?)
 
     /**
-     * 设置指定世界的爆炸保护状态。
+     * 设置指定世界的爆炸破坏状态。
      *
      * @param world 世界名称。
-     * @param exploded 新的爆炸保护状态。
+     * @param exploded 新的爆炸破坏状态。
      */
     fun setExploded(world: String, exploded: Boolean)
 
     /**
-     * 获取指定世界的爆炸保护状态。
+     * 获取指定世界的爆炸破坏状态。
      *
      * @param world 世界名称。
-     * @return 指定世界的爆炸保护状态。
+     * @return 指定世界的爆炸破坏状态。
      */
     fun isExploded(world: String): Boolean
 

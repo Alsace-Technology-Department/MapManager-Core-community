@@ -460,25 +460,25 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
                 if (noPermission(sender)) return false
                 if (args.size < 2) {
                     //show the status;
-                    sender.sendMessage("§b当前地图已 " + (if (mapAgent.isExploded(sender.world.name)) "开启" else "关闭") + " 爆炸保护")
+                    sender.sendMessage("§b当前地图已 " + (if (mapAgent.isExploded(sender.world.name)) "开启" else "关闭") + " 爆炸破坏")
                     return false
                 }
                 when (getOperation(args[1])) {
                     Operation.ENABLE -> {
                         //set to true
                         mapAgent.setExploded(sender.world.name, true)
-                        sender.sendMessage("§a已开启爆炸保护")
+                        sender.sendMessage("§a已开启爆炸破坏")
                     }
 
                     Operation.DISABLE -> {
                         //set to false
                         mapAgent.setExploded(sender.world.name, false)
-                        sender.sendMessage("§a已关闭爆炸保护")
+                        sender.sendMessage("§a已关闭爆炸破坏")
                     }
 
                     Operation.STATUS -> {
                         //show the status
-                        sender.sendMessage("§b当前地图已 " + (if (mapAgent.isPhysical(sender.world.name)) "开启" else "关闭") + " 爆炸保护")
+                        sender.sendMessage("§b当前地图已 " + (if (mapAgent.isExploded(sender.world.name)) "开启" else "关闭") + " 爆炸破坏")
                     }
                 }
             }

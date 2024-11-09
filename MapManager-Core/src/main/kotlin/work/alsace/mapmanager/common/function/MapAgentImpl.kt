@@ -397,9 +397,9 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 操作成功返回true，否则返回false。
      */
     override fun publicizeWorld(world: String): Boolean {
-        val lp = luckPerms.groupManager.getGroup("apply")
+        val lp = luckPerms.groupManager.getGroup("default")
         if (lp == null) {
-            plugin.logger.warning("§c未找到apply权限组")
+            plugin.logger.warning("§c未找到default权限组")
             return false
         }
         lp.data().add(PermissionNode.builder("multiverse.access." + world.lowercase(Locale.getDefault())).build())
@@ -415,9 +415,9 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 操作成功返回true，否则返回false。
      */
     override fun privatizeWorld(world: String): Boolean {
-        val lp = luckPerms.groupManager.getGroup("apply")
+        val lp = luckPerms.groupManager.getGroup("default")
         if (lp == null) {
-            plugin.logger.warning("§c未找到apply权限组")
+            plugin.logger.warning("§c未找到default权限组")
             return false
         }
         lp.data()
@@ -434,8 +434,16 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      * @return 如果世界为公共世界，返回true，否则返回false。
      */
     override fun isPublic(world: String): Boolean {
-        val color = world.let { dynamicWorld.getMVWorld(it)?.color }
-        return color == ChatColor.GOLD || color == ChatColor.DARK_GREEN
+        val lp = luckPerms.groupManager.getGroup("default")
+        if (lp == null) {
+            plugin.logger.warning("§c未找到default权限组")
+            return false
+        }
+        val group = lp.nodes
+        plugin.logger.info("group: $group")
+        return group.contains(
+            PermissionNode.builder("multiverse.access." + world.lowercase(Locale.getDefault())).build()
+        )
     }
 
     /**
@@ -661,15 +669,16 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
      *
      * @param world 世界名称。
      * @return 指定世界的物理规则状态。
+     *
      */
     override fun isPhysical(world: String): Boolean {
         return getWorldNode(world)?.physical == true
     }
 
     /**
-     * 设置全局爆炸保护状态。
+     * 设置全局爆炸破坏状态。
      *
-     * @param exploded 新的爆炸保护状态。
+     * @param exploded 新的爆炸破坏状态。
      */
     override fun setExploded(exploded: Boolean?) {
         Companion.exploded = exploded
@@ -678,20 +687,20 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
     }
 
     /**
-     * 设置指定世界的爆炸保护状态。
+     * 设置指定世界的爆炸破坏状态。
      *
      * @param world 世界名称。
-     * @param exploded 新的爆炸保护状态。
+     * @param exploded 新的爆炸破坏状态。
      */
     override fun setExploded(world: String, exploded: Boolean) {
         getWorldNode(world)?.exploded = exploded
     }
 
     /**
-     * 获取指定世界的爆炸保护状态。
+     * 获取指定世界的爆炸破坏状态。
      *
      * @param world 世界名称。
-     * @return 指定世界的爆炸保护状态。
+     * @return 指定世界的爆炸破坏状态。
      */
     override fun isExploded(world: String): Boolean {
         return getWorldNode(world)?.exploded == true
