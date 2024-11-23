@@ -440,7 +440,6 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
             return false
         }
         val group = lp.nodes
-        plugin.logger.info("group: $group")
         return group.contains(
             PermissionNode.builder("multiverse.access." + world.lowercase(Locale.getDefault())).build()
         )
