@@ -13,6 +13,7 @@ plugins {
 group = "work.alsace.mapmanager"
 version = "3.1.10"
 
+
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
