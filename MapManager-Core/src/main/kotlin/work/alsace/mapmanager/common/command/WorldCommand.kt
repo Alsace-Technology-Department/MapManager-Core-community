@@ -16,7 +16,6 @@ import work.alsace.mapmanager.MapManager
 import work.alsace.mapmanager.enums.MapGroup
 import work.alsace.mapmanager.service.DynamicWorld
 import work.alsace.mapmanager.service.MapAgent
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutionException
 import java.util.regex.Pattern
@@ -47,7 +46,6 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
     private val subCommandToggle: MutableList<String> =
         mutableListOf("on", "enable", "true", "yes", "off", "disable", "false", "no", "info", "status")
     private val emptyList: MutableList<String?> = ArrayList(0)
-    private val format: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
 
     private val cmdGuide: Component = Component.text("MapManager 命令帮助：", NamedTextColor.DARK_AQUA)
         .append(
@@ -289,10 +287,6 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
             }
 
             "builders" -> {
-                if (mapAgent.isPublic(sender.world.name)) {
-                    sender.sendMessage("§e该地图为公共地图，所有玩家均可进入并自由建筑")
-                    return false
-                }
                 val builders: MutableSet<String> = try {
                     mapAgent.getPlayers(mapAgent.getWorldGroupName(sender.world.name)!!, MapGroup.BUILDER).get()
                 } catch (e: InterruptedException) {
