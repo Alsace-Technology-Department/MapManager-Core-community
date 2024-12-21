@@ -195,6 +195,7 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
                 }
                 if (!mapAgent.isPlayerRegister(args[2])) {
                     sender.sendMessage("§a玩家" + args[2] + "不存在")
+                    return false
                 }
                 if (args[1].equals("add", ignoreCase = true)) {
                     if (mapAgent.addPlayer(
@@ -260,6 +261,7 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
                 }
                 if (!mapAgent.isPlayerRegister(args[2])) {
                     sender.sendMessage("§a玩家" + args[2] + "不存在")
+                    return false
                 }
                 if (args[1].equals("add", ignoreCase = true)) {
                     if (mapAgent.addPlayer(
@@ -329,6 +331,7 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
                 }
                 if (!mapAgent.isPlayerRegister(args[2])) {
                     sender.sendMessage("§a玩家" + args[2] + "不存在")
+                    return false
                 }
                 if (args[1].equals("add", ignoreCase = true)) {
                     if (mapAgent.addPlayer(
