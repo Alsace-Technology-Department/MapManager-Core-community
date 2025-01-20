@@ -281,11 +281,6 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
         }
         val uuid = getUniqueID(player)
 
-        if (!isPlayerRegister(player)) {
-            plugin.logger.warning("无法找到玩家$player")
-            return false
-        }
-
         val user: User? = try {
             luckPerms.userManager.loadUser(uuid).get()
         } catch (e: ExecutionException) {
