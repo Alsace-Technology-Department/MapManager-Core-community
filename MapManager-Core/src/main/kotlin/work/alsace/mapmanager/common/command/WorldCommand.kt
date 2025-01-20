@@ -193,10 +193,6 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
                     sender.sendMessage("§c给某玩家添加/移除管理员权限： /world admin add/remove <玩家id>")
                     return false
                 }
-                if (!mapAgent.isPlayerRegister(args[2])) {
-                    sender.sendMessage("§a玩家" + args[2] + "不存在")
-                    return false
-                }
                 if (args[1].equals("add", ignoreCase = true)) {
                     if (mapAgent.addPlayer(
                             sender.world.name,
@@ -257,10 +253,6 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
                 if (noPermission(sender)) return false
                 if (notEnough(3)) {
                     sender.sendMessage("§c给某玩家添加/移除建筑权限： /world builder add/remove <玩家id>")
-                    return false
-                }
-                if (!mapAgent.isPlayerRegister(args[2])) {
-                    sender.sendMessage("§a玩家" + args[2] + "不存在")
                     return false
                 }
                 if (args[1].equals("add", ignoreCase = true)) {
@@ -327,10 +319,6 @@ class WorldCommand(plugin: MapManager) : TabExecutor {
                 if (noPermission(sender)) return false
                 if (notEnough(3)) {
                     sender.sendMessage("§c给某玩家添加/移除参观权限： /world visitor add/remove <玩家id>")
-                    return false
-                }
-                if (!mapAgent.isPlayerRegister(args[2])) {
-                    sender.sendMessage("§a玩家" + args[2] + "不存在")
                     return false
                 }
                 if (args[1].equals("add", ignoreCase = true)) {
