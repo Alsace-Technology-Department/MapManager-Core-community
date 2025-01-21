@@ -333,42 +333,24 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
             plugin.logger.warning("§c无法找到" + world + "对应的权限组")
             return false
         }
-        var uuid: UUID? = null
-        var name = ""
-        val online = player.let { plugin.server.getPlayer(it) }
-        if (online == null) {
-            for (off in plugin.server.offlinePlayers!!) {
-                if (Objects.requireNonNull<String?>(off.name).equals(player, ignoreCase = true)) {
-                    uuid = off.uniqueId
-                    name = off.name.toString()
-                    break
-                }
-            }
-            if (uuid == null) {
-                plugin.logger.warning("§c玩家" + player + "不存在")
-                return false
-            }
-        } else {
-            uuid = online.uniqueId
-            name = online.name
-        }
+        val uuid = getUniqueID(player)
         val user = luckPerms.userManager.loadUser(uuid).join()
         when (group) {
             MapGroup.ADMIN -> {
                 run {
                     user?.data()?.remove(PermissionNode.builder("mapmanager.admin.$worldGroup").build())
-                    removeAdmin(world, name)
+                    removeAdmin(world, player)
                 }
                 run {
                     worldGroup.let { InheritanceNode.builder(it!!).build() }.let { user?.data()?.remove(it) }
-                    removeBuilder(world, name)
+                    removeBuilder(world, player)
                     groupIO?.save(groupMap)
                 }
             }
 
             MapGroup.BUILDER -> {
                 worldGroup.let { InheritanceNode.builder(it!!).build() }.let { user?.data()?.remove(it) }
-                removeBuilder(world, name)
+                removeBuilder(world, player)
                 groupIO?.save(groupMap)
             }
 
@@ -377,7 +359,7 @@ class MapAgentImpl(private val plugin: MapManagerImpl) : MapAgent {
                     ?.remove(
                         PermissionNode.builder("multiverse.access." + world.lowercase(Locale.getDefault())).build()
                     )
-                removeVisitor(world, name)
+                removeVisitor(world, player)
                 nodeIO?.save(nodeMap)
             }
         }
